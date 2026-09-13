@@ -1,0 +1,5 @@
+.navbar { min-height: 72px; padding: 0 5%; display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #e2ebe4; position: sticky; top: 0; z-index: 5; }
+.logo { border: 0; background: transparent; color: #18342a; font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.logo span { display: grid; place-items: center; width: 30px; height: 30px; color: white; background: #137a50; border-radius: 8px; }
+.navbar nav { display: flex; gap: 8px; }.navbar nav button { border: 0; background: transparent; color: #5d7065; padding: 9px 12px; font-size: 14px; }.navbar nav button:hover,.navbar nav .active { color: #137a50; font-weight: 700; }
+@media (max-width: 520px) { .navbar { padding: 0 18px; }.navbar nav button { padding: 8px 6px; font-size: 12px; }.logo { font-size: 18px; } }

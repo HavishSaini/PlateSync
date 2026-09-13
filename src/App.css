@@ -1,0 +1,13 @@
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+.page-container { max-width: 1160px; margin: 0 auto; padding: 64px 24px; }
+.section-label { color: #178354; font-size: 12px; font-weight: 700; letter-spacing: 1.2px; margin: 0 0 10px; }
+.page-title { font-size: clamp(32px, 5vw, 52px); margin: 0; letter-spacing: -1.5px; }
+.page-description { color: #667a70; line-height: 1.65; max-width: 610px; }
+.primary-button, .secondary-button { border-radius: 8px; padding: 13px 18px; font-weight: 700; border: 1px solid transparent; }
+.primary-button { background: #137a50; color: white; }
+.primary-button:hover { background: #0d6540; transform: translateY(-1px); }
+.secondary-button { background: white; border-color: #c9d9ce; color: #18342a; }
+.secondary-button:hover { border-color: #137a50; color: #137a50; }
+.notice { margin-top: 18px; border-radius: 7px; padding: 11px 14px; background: #eaf7ed; color: #176a45; font-size: 14px; }
+@media (max-width: 600px) { .page-container { padding: 42px 18px; } }
