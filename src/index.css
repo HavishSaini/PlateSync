@@ -1,6 +1,67 @@
-:root { font-family: Arial, Helvetica, sans-serif; color: #18342a; background: #f7faf7; }
+/* ─── Light theme (default) ────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  font-family: Arial, Helvetica, sans-serif;
+
+  /* Text */
+  --text-primary:   #18342a;
+  --text-secondary: #5d7065;
+
+  /* Surfaces */
+  --bg-page:        #f7faf7;
+  --bg-card:        #ffffff;
+  --nav-bg:         #ffffff;
+  --dropdown-bg:    #ffffff;
+
+  /* Accents */
+  --accent:         #137a50;
+  --accent-hover:   #0d6540;
+  --notice-bg:      #eaf7ed;
+  --notice-text:    #176a45;
+
+  /* Borders / subtle */
+  --border:         #e2ebe4;
+  --ham-bg:         #f3f7f4;
+  --ham-bg-hover:   #e6f0ea;
+
+  color:      var(--text-primary);
+  background: var(--bg-page);
+}
+
+/* ─── Dark theme ───────────────────────────────────────────── */
+[data-theme="dark"] {
+  /* Text */
+  --text-primary:   #dff0e8;
+  --text-secondary: #96b5a4;
+
+  /* Surfaces — comfortable mid-dark, not near-black */
+  --bg-page:        #232e28;
+  --bg-card:        #2c3d34;
+  --nav-bg:         #28382f;
+  --dropdown-bg:    #2f4037;
+
+  /* Accents */
+  --accent:         #3ecf84;
+  --accent-hover:   #34b872;
+  --notice-bg:      #263d2e;
+  --notice-text:    #6ddda4;
+
+  /* Borders / subtle */
+  --border:         #3d5447;
+  --ham-bg:         #2f4037;
+  --ham-bg-hover:   #364838;
+
+  color:      var(--text-primary);
+  background: var(--bg-page);
+}
+
+/* ─── Base reset ───────────────────────────────────────────── */
 * { box-sizing: border-box; }
-body { margin: 0; }
+body {
+  margin: 0;
+  background: var(--bg-page);
+  transition: background 0.25s, color 0.25s;
+}
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 a { color: inherit; }

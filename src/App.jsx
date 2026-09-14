@@ -13,17 +13,24 @@ export default function App() {
   const [page, setPage] = useState('home')
   const [role, setRole] = useState('student')
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('plateSyncUser')) || null)
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('plateSyncDark') === 'true')
 
   useEffect(() => {
     if (user) localStorage.setItem('plateSyncUser', JSON.stringify(user))
   }, [user])
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
+    localStorage.setItem('plateSyncDark', darkMode)
+  }, [darkMode])
+
   const startSignup = (selectedRole) => { setRole(selectedRole); setPage('signup') }
   const openDashboard = (newUser) => { setUser(newUser); setPage('dashboard') }
   const goHome = () => setPage('home')
+  const toggleDark = () => setDarkMode(prev => !prev)
 
   return <div className="app-shell">
-    <Navbar page={page} user={user} onNavigate={setPage} onHome={goHome} />
+    <Navbar page={page} user={user} onNavigate={setPage} onHome={goHome} darkMode={darkMode} toggleDark={toggleDark} />
     <main>
       {page === 'home' && <Home onGetStarted={() => setPage('roles')} />}
       {page === 'roles' && <RoleSelector onChoose={startSignup} onBack={goHome} />}

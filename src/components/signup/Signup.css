@@ -1,1 +1,18 @@
-.signup-page { min-height: calc(100vh - 72px); display: grid; grid-template-columns: 1fr 1fr; }.signup-intro { background: #153d2d; color: white; padding: 12vh max(8%,calc((100% - 1040px)/2)); }.signup-intro .section-label { color: #bdf479; }.signup-intro h1 { font-size: clamp(39px,5vw,62px); line-height: 1; margin: 13px 0; }.signup-intro h1 em { color: #bdf479; font-style: normal; }.signup-intro p:not(.section-label) { color: #c2d8cc; line-height: 1.6; max-width: 390px; }.signup-intro ul { list-style: none; padding: 0; margin-top: 35px; color: #d8eada; line-height: 2.2; }.signup-form { max-width: 420px; width: 100%; margin: auto; padding: 55px 25px; }.signup-form h2 { font-size: 29px; margin: 35px 0 24px; }.signup-form label { display: block; font-size: 13px; font-weight: 700; margin: 13px 0; }.signup-form input,.signup-form select { display: block; width: 100%; margin-top: 7px; padding: 11px; color: #18342a; background: #fff; border: 1px solid #cbd9ce; border-radius: 7px; outline: none; }.signup-form input:focus,.signup-form select:focus { border-color: #137a50; box-shadow: 0 0 0 3px #137a5018; }.form-error { font-size: 13px; color: #b9423b; background: #fee9e6; padding: 9px; border-radius: 6px; }.signup-submit { width: 100%; justify-content: space-between; margin-top: 10px; }@media(max-width:760px){.signup-page{grid-template-columns:1fr}.signup-intro{padding:55px 24px}.signup-form{padding:42px 24px}.signup-intro ul{display:none}}
+.signup-page { min-height: calc(100vh - 72px); display: grid; grid-template-columns: 1fr 1fr; }
+/* Left panel intentionally keeps dark green branding in both modes */
+.signup-intro { background: #153d2d; color: white; padding: 12vh max(8%,calc((100% - 1040px)/2)); }
+.signup-intro .section-label { color: #bdf479; }
+.signup-intro h1 { font-size: clamp(39px,5vw,62px); line-height: 1; margin: 13px 0; }
+.signup-intro h1 em { color: #bdf479; font-style: normal; }
+.signup-intro p:not(.section-label) { color: #c2d8cc; line-height: 1.6; max-width: 390px; }
+.signup-intro ul { list-style: none; padding: 0; margin-top: 35px; color: #d8eada; line-height: 2.2; }
+/* Right form panel — theme-aware */
+.signup-form { max-width: 420px; width: 100%; margin: auto; padding: 55px 25px; }
+.signup-form h2 { font-size: 29px; margin: 35px 0 24px; color: var(--text-primary); }
+.signup-form label { display: block; font-size: 13px; font-weight: 700; margin: 13px 0; color: var(--text-primary); }
+.signup-form input,.signup-form select { display: block; width: 100%; margin-top: 7px; padding: 11px; color: var(--text-primary); background: var(--bg-card); border: 1px solid var(--border); border-radius: 7px; outline: none; transition: background 0.25s, border-color 0.25s, color 0.25s; }
+.signup-form input:focus,.signup-form select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(19,122,80,0.1); }
+.form-error { font-size: 13px; color: #b9423b; background: #fee9e6; padding: 9px; border-radius: 6px; }
+[data-theme="dark"] .form-error { background: #2a1410; color: #f08070; }
+.signup-submit { width: 100%; justify-content: space-between; margin-top: 10px; }
+@media(max-width:760px){.signup-page{grid-template-columns:1fr}.signup-intro{padding:55px 24px}.signup-form{padding:42px 24px}.signup-intro ul{display:none}}

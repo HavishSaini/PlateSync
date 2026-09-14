@@ -1,1 +1,3 @@
-.footer { background: #143a2b; color: #dbeee1; padding: 22px 5%; display: flex; justify-content: space-between; gap: 14px; font-size: 13px; }.footer span { color: #a9c4b4; }@media(max-width:600px){.footer{flex-direction:column;text-align:center;}}
+.footer { background: #143a2b; color: #dbeee1; padding: 22px 5%; display: flex; justify-content: space-between; gap: 14px; font-size: 13px; transition: background 0.25s; }
+.footer span { color: #a9c4b4; }
+@media(max-width:600px){.footer{flex-direction:column;text-align:center;}}

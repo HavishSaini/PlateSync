@@ -1,5 +1,178 @@
-.navbar { min-height: 72px; padding: 0 5%; display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #e2ebe4; position: sticky; top: 0; z-index: 5; }
-.logo { border: 0; background: transparent; color: #18342a; font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-.logo span { display: grid; place-items: center; width: 30px; height: 30px; color: white; background: #137a50; border-radius: 8px; }
-.navbar nav { display: flex; gap: 8px; }.navbar nav button { border: 0; background: transparent; color: #5d7065; padding: 9px 12px; font-size: 14px; }.navbar nav button:hover,.navbar nav .active { color: #137a50; font-weight: 700; }
-@media (max-width: 520px) { .navbar { padding: 0 18px; }.navbar nav button { padding: 8px 6px; font-size: 12px; }.logo { font-size: 18px; } }
+/* ─── Navbar shell ─────────────────────────────────────────── */
+.navbar {
+  min-height: 72px;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+/* ─── Logo ─────────────────────────────────────────────────── */
+.logo {
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+.logo span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: white;
+  background: #137a50;
+  border-radius: 8px;
+}
+
+/* ─── Nav links ────────────────────────────────────────────── */
+.navbar nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.navbar nav > button {
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 9px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+.navbar nav > button:hover,
+.navbar nav > button.active {
+  color: #137a50;
+  font-weight: 700;
+}
+
+/* ─── Hamburger button ─────────────────────────────────────── */
+.hamburger-wrap {
+  position: relative;
+}
+
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  background: var(--ham-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+.hamburger-btn:hover {
+  background: var(--ham-bg-hover);
+}
+.hamburger-btn span {
+  display: block;
+  width: 16px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: transform 0.25s, opacity 0.25s;
+  transform-origin: center;
+}
+
+/* Animate to X when open */
+.hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ─── Dropdown panel ───────────────────────────────────────── */
+.hamburger-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 210px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  animation: dropIn 0.18s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  color: var(--text-secondary);
+  padding: 4px 10px 6px;
+  margin: 0;
+}
+
+/* ─── Dark mode toggle row ─────────────────────────────────── */
+.dark-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.dark-toggle:hover {
+  background: var(--ham-bg-hover);
+}
+.toggle-icon { font-size: 16px; line-height: 1; }
+.dark-toggle > span:nth-child(2) { flex: 1; text-align: left; }
+
+/* Pill switch */
+.toggle-pill {
+  width: 34px;
+  height: 19px;
+  border-radius: 100px;
+  background: var(--border);
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.25s;
+}
+.toggle-pill::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.25s;
+}
+.toggle-pill.on {
+  background: #137a50;
+}
+.toggle-pill.on::after {
+  transform: translateX(15px);
+}
+
+/* ─── Responsive ───────────────────────────────────────────── */
+@media (max-width: 520px) {
+  .navbar { padding: 0 18px; }
+  .navbar nav > button { padding: 8px 6px; font-size: 12px; }
+  .logo { font-size: 18px; }
+}
