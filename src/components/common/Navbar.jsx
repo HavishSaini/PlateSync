@@ -32,6 +32,24 @@ export default function Navbar({ page, user, onNavigate, onHome, darkMode, toggl
           </button>
         )}
 
+        {/* Auth buttons */}
+        <div className="nav-auth-btns">
+          <button
+            className="nav-login-btn"
+            id="nav-login"
+            onClick={() => window.open('/?view=login', '_blank')}
+          >
+            Login
+          </button>
+          <button
+            className="nav-signup-btn"
+            id="nav-signup"
+            onClick={() => window.open('/?view=signup-page', '_blank')}
+          >
+            Sign Up
+          </button>
+        </div>
+
         {/* Hamburger button */}
         <div className="hamburger-wrap" ref={menuRef}>
           <button

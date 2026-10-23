@@ -56,6 +56,53 @@
   font-weight: 700;
 }
 
+/* ─── Auth buttons ─────────────────────────────────────────── */
+.nav-auth-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+}
+
+.nav-login-btn,
+.nav-signup-btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  font: inherit;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+/* Login — outline style */
+.nav-login-btn {
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+}
+.nav-login-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(19, 122, 80, 0.25);
+}
+
+/* Sign Up — filled accent */
+.nav-signup-btn {
+  background: var(--accent);
+  color: white;
+  border: 1.5px solid transparent;
+}
+.nav-signup-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(19, 122, 80, 0.35);
+}
+
 /* ─── Hamburger button ─────────────────────────────────────── */
 .hamburger-wrap {
   position: relative;
@@ -175,4 +222,5 @@
   .navbar { padding: 0 18px; }
   .navbar nav > button { padding: 8px 6px; font-size: 12px; }
   .logo { font-size: 18px; }
+  .nav-login-btn, .nav-signup-btn { padding: 7px 11px; font-size: 12px; }
 }

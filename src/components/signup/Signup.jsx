@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './Signup.css'
-const hostels = ['Alfred Noble-A', 'Alfred Noble-B', 'Archimedes-A', 'Archimedes-B', 'Franklin-A', 'Franklin-B']
+const hostels = ['Alfred Noble-A', 'Alfred Noble-B', 'Archimedes-A', 'Archimedes-B', 'Franklin-A', 'Franklin-B', 'Magellan']
 export default function Signup({ role, onSubmit, onBack }) {
   const [form, setForm] = useState({ fullName: '', rollNo: '', hostel: '', room: '', messId: '', staffId: '', email: '' })
   const [error, setError] = useState('')
