@@ -48,6 +48,19 @@ export function NotificationProvider({ user, children }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.email])
 
+  // Sync notifications on storage updates or cross-session events
+  useEffect(() => {
+    const handleSync = () => {
+      setNotifications(loadNotifs(userRef.current))
+    }
+    window.addEventListener('storage', handleSync)
+    window.addEventListener('plateSyncNotifUpdate', handleSync)
+    return () => {
+      window.removeEventListener('storage', handleSync)
+      window.removeEventListener('plateSyncNotifUpdate', handleSync)
+    }
+  }, [])
+
   // Persist whenever notifications change
   useEffect(() => {
     saveNotifs(userRef.current, notifications)

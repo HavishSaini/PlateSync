@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import MealCard from '../shared/MealCard'
 import { useNotifications } from '../../context/NotificationContext'
+import { syncAdminReportNotifications } from '../../utils/reportsStorage'
+import IssueReportView from '../issues/IssueReportView'
+import AdminIssueView from '../issues/AdminIssueView'
 import './Dashboard.css'
 
 const meals = [
@@ -9,8 +12,8 @@ const meals = [
   { id:'snacks', name:'Snacks', icon:'☕', startTime:'16:30', time:'4:30 PM – 5:30 PM', waste:'14 kg', menu:'Vegetable Pasta · Cold Coffee' },
   { id:'dinner', name:'Dinner', icon:'◑', startTime:'19:30', time:'7:30 PM – 9:30 PM', waste:'60 kg', menu:'Hari Dal · Chilli Potato · Rice · Roti · Chutney · Laddoo' },
 ]
-const studentTabs = ['Today\u2019s meals', 'My attendance', 'My impact']
-const adminTabs = ['Live demand', 'Mark attendance', 'Waste analysis']
+const studentTabs = ['Today\u2019s meals', 'My attendance', 'My impact', 'Report issue']
+const adminTabs   = ['Live demand', 'Mark attendance', 'Waste analysis', 'Issue reports']
 
 // A booking is possible only during the 45 minutes before a meal starts.
 function getBookingInfo(meal, now) {
@@ -56,7 +59,6 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
         actionLabel: 'View Today\'s Meals',
         actionPage: 'dashboard',
       })
-      // Also seed a reminder about booking deadlines
       addNotification({
         title: 'Booking Reminder',
         message: 'Meal bookings open 45 minutes before each meal. Next: Breakfast opens at 7:15 AM, Lunch at 11:45 AM.',
@@ -64,6 +66,7 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
         eventKey: `booking_reminder_${user.email}_first`,
       })
     } else if (user.role === 'admin') {
+      syncAdminReportNotifications(user.email)
       addNotification({
         title: 'Admin Dashboard Active',
         message: `Welcome, ${user.fullName?.split(' ')[0] || 'Admin'}! Live demand data is ready. Use the Mark Attendance tab to track meal service.`,
@@ -72,7 +75,6 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
         actionLabel: 'View Live Demand',
         actionPage: 'dashboard',
       })
-      // Seed a sample menu update announcement
       addNotification({
         title: 'Menu Update Published',
         message: "Today's menu has been confirmed: Breakfast — Mix Parantha, Lunch — Soya Chaap, Snacks — Pasta, Dinner — Hari Dal.",
@@ -95,7 +97,6 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
     setBookings(exists ? bookings.filter(item => item !== id) : [...bookings, id])
     setMessage(exists ? 'Booking cancelled. The mess can update its estimate.' : 'Meal booked! Your plate is included in the demand estimate.')
 
-    // Generate persistent notification (deduped per meal per day per action)
     if (exists) {
       addNotification({
         title: `${meal.name} Booking Cancelled`,
@@ -131,16 +132,26 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
           <span>{user.hostel}{user.role === 'admin' ? ` · Staff: ${user.staffId}` : ` · Room ${user.room}`}</span>
         </div>
       </div>
-      <div className="dashboard-tabs" role="tablist">{tabs.map(tab => <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? 'selected' : ''}>{tab}</button>)}</div>
-      {user.role === 'admin' ? <AdminView activeTab={activeTab} user={user} /> : <StudentView activeTab={activeTab} bookings={bookings} message={message} onBook={changeBooking} currentTime={currentTime} />}
+      <div className="dashboard-tabs" role="tablist">
+        {tabs.map(tab => (
+          <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? 'selected' : ''}>
+            {tab}
+          </button>
+        ))}
+      </div>
+      {user.role === 'admin'
+        ? <AdminView activeTab={activeTab} user={user} />
+        : <StudentView activeTab={activeTab} bookings={bookings} message={message} onBook={changeBooking} currentTime={currentTime} user={user} />
+      }
     </section>
   )
 }
 
-function StudentView({ activeTab, bookings, message, onBook, currentTime }) {
+function StudentView({ activeTab, bookings, message, onBook, currentTime, user }) {
   const savedFood = useMemo(() => (bookings.length * 0.35).toFixed(2), [bookings])
   if (activeTab === 'My attendance') return <Attendance bookings={bookings} />
   if (activeTab === 'My impact') return <section className="impact-view"><p className="section-label">YOUR RESPONSIBILITY SCORE</p><h2>Every booking makes a difference.</h2><div className="impact-score"><strong>{Math.min(100, 80 + bookings.length * 5)}<small>/100</small></strong><p>Your score grows when you book thoughtfully and attend your confirmed meals.</p></div><div className="summary-grid"><Summary title="MEALS BOOKED" value={`${bookings.length} / 4`} detail="for today"/><Summary title="ESTIMATED FOOD SAVED" value={`${savedFood} kg`} detail="from your bookings"/><Summary title="DAILY HOSTEL TARGET" value="194 kg" detail="average waste to reduce"/></div></section>
+  if (activeTab === 'Report issue') return <IssueReportView user={user} />
   return <><div className="summary-grid"><Summary title="MEALS BOOKED" value={`${bookings.length} / 4`} detail="for today"/><Summary title="ESTIMATED FOOD SAVED" value={`${savedFood} kg`} detail="based on your bookings"/><Summary title="BOOKING WINDOW" value="45 min" detail="only before the meal starts"/></div>{message && <p className="notice">{message}</p>}<div className="dashboard-head"><div><p className="section-label">TODAY'S MESS MENU</p><h2>Choose meals responsibly</h2></div><p>Real-time booking opens only during the 45 minutes before each meal.</p></div><div className="dashboard-meals">{meals.map(meal => <MealCard key={meal.id} meal={meal} booked={bookings.includes(meal.id)} onBook={onBook} bookingInfo={getBookingInfo(meal, currentTime)} />)}</div></>
 }
 
@@ -162,7 +173,6 @@ function AdminView({ activeTab, user }) {
     if (!rollNo.trim()) return
     setAttendance(attendance + 1)
     setNotice(`${rollNo} marked as attended.`)
-    // Notify admin that attendance was marked
     addNotification({
       title: 'Attendance Marked',
       message: `Student ${rollNo.trim()} has been marked as attended for today's meal.`,
@@ -172,6 +182,7 @@ function AdminView({ activeTab, user }) {
     setRollNo('')
   }
 
+  if (activeTab === 'Issue reports') return <AdminIssueView user={user} />
   if (activeTab === 'Mark attendance') return <section className="admin-form"><p className="section-label">MESS STAFF ACTION</p><h2>Mark student attendance</h2><p>Enter the student roll number after serving their booked meal.</p><form onSubmit={markAttendance}><label>Student roll number<input value={rollNo} onChange={event => setRollNo(event.target.value)} placeholder="Enter roll number" /></label><button className="primary-button">Mark attended ✓</button></form>{notice && <p className="notice">{notice}</p>}<div className="attendance-total"><strong>{attendance}</strong><span>students marked attended in this session</span></div></section>
   if (activeTab === 'Waste analysis') return <WasteAnalysis />
   return <LiveDemand />
