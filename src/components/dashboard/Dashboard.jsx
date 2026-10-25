@@ -7,6 +7,7 @@ import {
   getMealsForToday,
   getNextEligibleMeal,
   getMealTimes,
+  getAttendancePeriodInfo,
   saveMealMenu,
 } from '../../utils/menuStorage'
 import {
@@ -183,10 +184,63 @@ function StudentView({ activeTab, bookings, message, onBook, currentTime, user, 
 }
 
 function Attendance({ bookings, meals = DEFAULT_MEALS }) {
-  const [seconds, setSeconds] = useState(2700)
-  useEffect(() => { const timer = setInterval(() => setSeconds(old => old > 0 ? old - 1 : 0), 1000); return () => clearInterval(timer) }, [])
-  const minutes = String(Math.floor(seconds / 60)).padStart(2, '0'); const remainingSeconds = String(seconds % 60).padStart(2, '0')
-  return <section className="attendance-view"><p className="section-label">ATTENDANCE CHECK-IN</p><h2>Your meal attendance</h2><p>Show your booking at the mess counter. The staff marks you as attended during the meal period.</p><div className="timer-card"><span>TIME LEFT FOR CURRENT MEAL PERIOD</span><strong>00:{minutes}:{remainingSeconds}</strong><small>Attendance can be marked from 12:30 PM to 2:30 PM for lunch.</small></div><div className="attendance-list">{meals.map(meal => <div key={meal.id}><span>{meal.name}</span><b className={bookings.includes(meal.id) ? 'confirmed' : 'pending'}>{bookings.includes(meal.id) ? 'Confirmed — show at counter' : 'Not booked'}</b></div>)}</div></section>
+  const [periodInfo, setPeriodInfo] = useState(() => getAttendancePeriodInfo(new Date()))
+  const [diffSeconds, setDiffSeconds] = useState(() => {
+    const info = getAttendancePeriodInfo(new Date())
+    return Math.max(0, Math.floor((info.targetTime.getTime() - Date.now()) / 1000))
+  })
+
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date()
+      const info = getAttendancePeriodInfo(now)
+      setPeriodInfo(info)
+      const remaining = Math.max(0, Math.floor((info.targetTime.getTime() - now.getTime()) / 1000))
+      setDiffSeconds(remaining)
+    }
+
+    tick()
+    const timer = setInterval(tick, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const hours = String(Math.floor(diffSeconds / 3600)).padStart(2, '0')
+  const minutes = String(Math.floor((diffSeconds % 3600) / 60)).padStart(2, '0')
+  const seconds = String(diffSeconds % 60).padStart(2, '0')
+
+  return (
+    <section className="attendance-view">
+      <p className="section-label">ATTENDANCE CHECK-IN</p>
+      <h2>Your meal attendance</h2>
+      <p>Show your booking at the mess counter. The staff marks you as attended during the meal period.</p>
+
+      <div className="timer-card">
+        <span>{periodInfo.label}</span>
+        <strong>{hours}:{minutes}:{seconds}</strong>
+        <small>{periodInfo.detail}</small>
+      </div>
+
+      <div className="attendance-list">
+        {meals.map(meal => {
+          const isBooked = bookings.includes(meal.id)
+          const isCurrentActive = periodInfo.status === 'active' && periodInfo.meal.id === meal.id
+
+          return (
+            <div key={meal.id} style={isCurrentActive ? { borderColor: 'var(--accent)', background: 'rgba(19, 122, 80, 0.08)' } : undefined}>
+              <span>
+                <strong>{meal.name}</strong>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)', marginLeft: 8 }}>({meal.time})</span>
+                {isCurrentActive && <span style={{ marginLeft: 8, fontSize: 11, background: '#137a50', color: '#fff', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Serving Now</span>}
+              </span>
+              <b className={isBooked ? 'confirmed' : 'pending'}>
+                {isBooked ? 'Confirmed — show at counter' : 'Not booked'}
+              </b>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
 }
 
 function AdminView({ activeTab, user, currentTime }) {

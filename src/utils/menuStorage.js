@@ -6,10 +6,10 @@
 const MENU_OVERRIDES_KEY = 'plateSyncMenuOverrides'
 
 export const DEFAULT_MEALS = [
-  { id: 'breakfast', name: 'Breakfast', icon: '☀', startTime: '08:00', time: '8:00 AM – 9:30 AM', waste: '60 kg', menu: 'Mix Parantha · Curd · Chutney · Tea' },
-  { id: 'lunch',     name: 'Lunch',     icon: '◐', startTime: '12:30', time: '12:30 PM – 2:30 PM', waste: '60 kg', menu: 'Saboot Mix Dal · Tawa Soya Chaap · Rice · Roti · Raita' },
-  { id: 'snacks',    name: 'Snacks',    icon: '☕', startTime: '16:30', time: '4:30 PM – 5:30 PM', waste: '14 kg', menu: 'Vegetable Pasta · Cold Coffee' },
-  { id: 'dinner',    name: 'Dinner',    icon: '◑', startTime: '19:30', time: '7:30 PM – 9:30 PM', waste: '60 kg', menu: 'Hari Dal · Chilli Potato · Rice · Roti · Chutney · Laddoo' },
+  { id: 'breakfast', name: 'Breakfast', icon: '☀', startTime: '08:00', endTime: '09:30', time: '8:00 AM – 9:30 AM', waste: '60 kg', menu: 'Mix Parantha · Curd · Chutney · Tea' },
+  { id: 'lunch',     name: 'Lunch',     icon: '◐', startTime: '12:30', endTime: '14:30', time: '12:30 PM – 2:30 PM', waste: '60 kg', menu: 'Saboot Mix Dal · Tawa Soya Chaap · Rice · Roti · Raita' },
+  { id: 'snacks',    name: 'Snacks',    icon: '☕', startTime: '16:30', endTime: '17:30', time: '4:30 PM – 5:30 PM', waste: '14 kg', menu: 'Vegetable Pasta · Cold Coffee' },
+  { id: 'dinner',    name: 'Dinner',    icon: '◑', startTime: '19:30', endTime: '21:30', time: '7:30 PM – 9:30 PM', waste: '60 kg', menu: 'Hari Dal · Chilli Potato · Rice · Roti · Chutney · Laddoo' },
 ]
 
 export const DEFAULT_WEEKLY_MENU = [
@@ -102,6 +102,62 @@ export function getNextEligibleMeal(now = new Date()) {
     bookingStart,
     isLocked,
     lockReason: isLocked ? 'Menu locked because student booking has started.' : null,
+  }
+}
+
+/**
+ * Determine the current active meal period or upcoming meal period for attendance check-in.
+ */
+export function getAttendancePeriodInfo(now = new Date()) {
+  const parseTime = (timeStr, baseDate) => {
+    const [h, m] = timeStr.split(':').map(Number)
+    const d = new Date(baseDate)
+    d.setHours(h, m, 0, 0)
+    return d
+  }
+  const formatHourMin = (d) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+
+  // 1. Check if any meal is currently active (serving in progress)
+  for (const meal of DEFAULT_MEALS) {
+    const mealStart = parseTime(meal.startTime, now)
+    const mealEnd = parseTime(meal.endTime || meal.startTime, now)
+    if (now >= mealStart && now < mealEnd) {
+      return {
+        status: 'active',
+        meal,
+        targetTime: mealEnd,
+        label: `TIME LEFT FOR ${meal.name.toUpperCase()} SERVING`,
+        detail: `Attendance can be marked at the mess counter until ${formatHourMin(mealEnd)} for ${meal.name}.`,
+      }
+    }
+  }
+
+  // 2. Check for upcoming meal today
+  for (const meal of DEFAULT_MEALS) {
+    const mealStart = parseTime(meal.startTime, now)
+    if (now < mealStart) {
+      return {
+        status: 'upcoming',
+        meal,
+        targetTime: mealStart,
+        label: `TIME UNTIL ${meal.name.toUpperCase()} CHECK-IN OPENS`,
+        detail: `Attendance check-in for ${meal.name} opens at ${formatHourMin(mealStart)} (${meal.time}).`,
+      }
+    }
+  }
+
+  // 3. Past dinner: next is tomorrow's Breakfast
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowBreakfast = DEFAULT_MEALS[0]
+  const breakfastStart = parseTime(tomorrowBreakfast.startTime, tomorrow)
+
+  return {
+    status: 'tomorrow',
+    meal: tomorrowBreakfast,
+    targetTime: breakfastStart,
+    label: 'TIME UNTIL TOMORROW BREAKFAST CHECK-IN',
+    detail: 'All meal periods for today have finished. Next check-in opens tomorrow at 8:00 AM for Breakfast.',
   }
 }
 
