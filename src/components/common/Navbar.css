@@ -103,6 +103,49 @@
   box-shadow: 0 4px 14px rgba(19, 122, 80, 0.35);
 }
 
+/* Logged-in: user name + role badge */
+.nav-user-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 0 4px;
+}
+.nav-user-role {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: var(--accent);
+  color: white;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* Logout button */
+.nav-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  font: inherit;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+  white-space: nowrap;
+  background: transparent;
+  color: #b9423b;
+  border: 1.5px solid #b9423b;
+}
+.nav-logout-btn:hover {
+  background: #b9423b;
+  color: white;
+  transform: translateY(-1px);
+}
+
 /* ─── Hamburger button ─────────────────────────────────────── */
 .hamburger-wrap {
   position: relative;

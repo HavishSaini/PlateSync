@@ -18,16 +18,17 @@ export default function SignupPage({ onNavigate }) {
   const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
 
   const passwordRules = [
-    { id: 'len', label: 'At least 8 characters', met: form.password.length >= 8 },
-    { id: 'upper', label: 'At least one uppercase letter (A-Z)', met: /[A-Z]/.test(form.password) },
-    { id: 'lower', label: 'At least one lowercase letter (a-z)', met: /[a-z]/.test(form.password) },
-    { id: 'num', label: 'At least one number (0-9)', met: /\d/.test(form.password) },
-    { id: 'special', label: 'At least one special character (!@#$%...)', met: /[^A-Za-z0-9]/.test(form.password) }
+    { id: 'len',     label: 'At least 8 characters',                      met: form.password.length >= 8 },
+    { id: 'upper',   label: 'At least one uppercase letter (A-Z)',         met: /[A-Z]/.test(form.password) },
+    { id: 'lower',   label: 'At least one lowercase letter (a-z)',         met: /[a-z]/.test(form.password) },
+    { id: 'num',     label: 'At least one number (0-9)',                   met: /\d/.test(form.password) },
+    { id: 'special', label: 'At least one special character (!@#$%...)',   met: /[^A-Za-z0-9]/.test(form.password) }
   ]
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
+
     if (!form.email.endsWith('@chitkara.edu.in')) {
       setError('Please enter your Chitkara email ending in @chitkara.edu.in')
       return
@@ -36,10 +37,34 @@ export default function SignupPage({ onNavigate }) {
       setError('Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.')
       return
     }
+
     setLoading(true)
     setTimeout(() => {
+      // Check for duplicate email in the registered users list
+      const existing = JSON.parse(localStorage.getItem('plateSyncUsers') || '[]')
+      if (existing.find(u => u.email === form.email)) {
+        setError('An account with this email already exists. Please log in instead.')
+        setLoading(false)
+        return
+      }
+
+      // Build the user record — role comes from the userType field
+      const newUser = {
+        fullName:  form.fullName,
+        hostel:    form.hostel,
+        role:      form.userType,      // 'student' | 'admin'
+        email:     form.email,
+        password:  form.password,      // demo-only; plaintext is fine here
+        ...(form.userType === 'student'
+          ? { rollNo: form.rollNo, room: form.room }
+          : { staffId: form.staffId, messId: form.messId })
+      }
+
+      localStorage.setItem('plateSyncUsers', JSON.stringify([...existing, newUser]))
       setLoading(false)
-      alert('Account created! (Demo – connect your backend.)')
+
+      // Navigate to Login and pass a flag so it can display a success banner
+      if (onNavigate) onNavigate('login', { signupSuccess: true })
     }, 800)
   }
 

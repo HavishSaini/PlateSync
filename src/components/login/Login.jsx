@@ -1,7 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import './Login.css'
 
-export default function Login({ onNavigate }) {
+export default function Login({ onNavigate, onLogin, signupSuccess }) {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -11,15 +11,31 @@ export default function Login({ onNavigate }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
+
     if (!form.email.endsWith('@chitkara.edu.in')) {
       setError('Please use your Chitkara email ending in @chitkara.edu.in')
       return
     }
+
     setLoading(true)
     setTimeout(() => {
+      const users = JSON.parse(localStorage.getItem('plateSyncUsers') || '[]')
+      const match = users.find(
+        u => u.email === form.email && u.password === form.password
+      )
+
+      if (!match) {
+        setError('Invalid email or password. Please check your credentials and try again.')
+        setLoading(false)
+        return
+      }
+
+      // Persist the active session (without the password)
+      const { password: _pw, ...sessionUser } = match
+      localStorage.setItem('plateSyncUser', JSON.stringify(sessionUser))
       setLoading(false)
-      alert('Login submitted! (Demo – connect your backend.)')
-    }, 800)
+      if (onLogin) onLogin(sessionUser)
+    }, 600)
   }
 
   return (
@@ -29,6 +45,12 @@ export default function Login({ onNavigate }) {
           <span className="login-logo-icon">P</span>
           <span className="login-logo-name">PlateSync</span>
         </div>
+
+        {signupSuccess && (
+          <p className="login-success" role="status">
+            ✓ Account created successfully! Please log in below.
+          </p>
+        )}
 
         <h1 className="login-heading">Welcome back</h1>
         <p className="login-subtitle">Log in to your PlateSync account</p>

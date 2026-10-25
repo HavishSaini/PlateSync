@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './Navbar.css'
 
-export default function Navbar({ page, user, onNavigate, onHome, darkMode, toggleDark }) {
+export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkMode, toggleDark }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -24,33 +24,52 @@ export default function Navbar({ page, user, onNavigate, onHome, darkMode, toggl
 
       <nav aria-label="Main navigation">
         <button onClick={onHome} className={page === 'home' ? 'active' : ''}>Home</button>
-        <button onClick={() => onNavigate('roles')}>Get Started</button>
         <button onClick={() => onNavigate('menu')} className={page === 'menu' ? 'active' : ''}>Menu</button>
+
         {user && (
-          <button onClick={() => onNavigate('dashboard')} className={page === 'dashboard' ? 'active' : ''}>
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className={page === 'dashboard' ? 'active' : ''}
+          >
             My Dashboard
           </button>
         )}
 
-        {/* Auth buttons */}
-        <div className="nav-auth-btns">
-          <button
-            className="nav-login-btn"
-            id="nav-login"
-            onClick={() => window.open('/?view=login', '_blank')}
-          >
-            Login
-          </button>
-          <button
-            className="nav-signup-btn"
-            id="nav-signup"
-            onClick={() => window.open('/?view=signup-page', '_blank')}
-          >
-            Sign Up
-          </button>
-        </div>
+        {/* Auth area — changes based on login state */}
+        {user ? (
+          <div className="nav-auth-btns">
+            <span className="nav-user-name" title={user.email}>
+              {user.fullName?.split(' ')[0]}
+              <span className="nav-user-role">{user.role}</span>
+            </span>
+            <button
+              className="nav-logout-btn"
+              id="nav-logout"
+              onClick={onLogout}
+            >
+              Log out
+            </button>
+          </div>
+        ) : (
+          <div className="nav-auth-btns">
+            <button
+              className="nav-login-btn"
+              id="nav-login"
+              onClick={() => onNavigate('login')}
+            >
+              Login
+            </button>
+            <button
+              className="nav-signup-btn"
+              id="nav-signup"
+              onClick={() => onNavigate('signup-page')}
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
 
-        {/* Hamburger button */}
+        {/* Hamburger / settings button */}
         <div className="hamburger-wrap" ref={menuRef}>
           <button
             className={`hamburger-btn${menuOpen ? ' open' : ''}`}

@@ -1,4 +1,4 @@
-﻿/* ── Page shell ── */
+/* ── Page shell ── */
 .login-page {
   min-height: calc(100vh - 72px);
   display: grid;
@@ -112,6 +112,18 @@
   margin-bottom: 12px;
 }
 [data-theme="dark"] .login-error { background: #2a1410; color: #f08070; }
+
+/* ── Success banner (post-signup) ── */
+.login-success {
+  font-size: 13px;
+  color: #1a6b40;
+  background: #e8f7ee;
+  padding: 9px 12px;
+  border-radius: 7px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+[data-theme="dark"] .login-success { background: #0e2a1a; color: #6fcf97; }
 
 /* ── Submit ── */
 .login-submit {

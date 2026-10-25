@@ -24,7 +24,7 @@ function getBookingInfo(meal, now) {
 }
 function formatTime(time) { return time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) }
 
-export default function Dashboard({ user, onHome }) {
+export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
   const [bookings, setBookings] = useState(() => JSON.parse(localStorage.getItem('plateSyncBookings')) || [])
   const [activeTab, setActiveTab] = useState(user?.role === 'admin' ? 'Live demand' : 'Today’s meals')
   const [message, setMessage] = useState('')
