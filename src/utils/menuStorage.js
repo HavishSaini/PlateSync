@@ -165,9 +165,10 @@ export function getAttendancePeriodInfo(now = new Date()) {
 
 export function getMealMenu(mealId, dateStr = new Date().toISOString().slice(0, 10)) {
   const overrides = getStoredOverrides()
+  // Only look up the date-specific key — never fall back to a generic key
+  // to prevent overrides for a future date bleeding into today's display.
   const dateKey = `${dateStr}_${mealId}`
   if (overrides[dateKey]) return overrides[dateKey]
-  if (overrides[mealId]) return overrides[mealId]
   const defaultMeal = DEFAULT_MEALS.find(m => m.id === mealId)
   return defaultMeal ? defaultMeal.menu : ''
 }
@@ -183,23 +184,176 @@ export function getMealsForToday(now = new Date()) {
 export function getWeeklyMenu(now = new Date()) {
   const currentDayName = DAY_NAMES[now.getDay()]
   const dateStr = now.toISOString().slice(0, 10)
+
+  // Also check if next eligible meal is tomorrow and include that date for overrides
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowDayName = DAY_NAMES[tomorrow.getDay()]
+  const tomorrowDateStr = tomorrow.toISOString().slice(0, 10)
+
   return DEFAULT_WEEKLY_MENU.map(row => {
     const day = row[0]
-    if (day !== currentDayName) {
-      return [...row]
+    // Apply overrides for today's row
+    if (day === currentDayName) {
+      const updatedRow = [...row]
+      DEFAULT_MEALS.forEach(meal => {
+        const idx = MEAL_INDEX_MAP[meal.id]
+        if (idx) updatedRow[idx] = getMealMenu(meal.id, dateStr)
+      })
+      return updatedRow
     }
-    const updatedRow = [...row]
-    DEFAULT_MEALS.forEach(meal => {
-      const idx = MEAL_INDEX_MAP[meal.id]
-      if (idx) {
-        updatedRow[idx] = getMealMenu(meal.id, dateStr)
-      }
-    })
-    return updatedRow
+    // Apply overrides for tomorrow's row (so admin-updated next-day meals show up)
+    if (day === tomorrowDayName) {
+      const updatedRow = [...row]
+      DEFAULT_MEALS.forEach(meal => {
+        const idx = MEAL_INDEX_MAP[meal.id]
+        if (idx) {
+          const override = getMealMenu(meal.id, tomorrowDateStr)
+          // Only replace if there's an actual saved override (not just the default)
+          const defaultMenu = DEFAULT_MEALS.find(m => m.id === meal.id)?.menu || ''
+          if (override !== defaultMenu) updatedRow[idx] = override
+        }
+      })
+      return updatedRow
+    }
+    return [...row]
   })
 }
 
 // ── Mutation with Strict Shared Locking ───────────────────────────────────────
+
+/**
+ * Broadcast an announcement or update notification to all students and visitors.
+ * Persists the notification into:
+ * 1. Global broadcast list `plateSyncBroadcastNotifs` (for students who log in later)
+ * 2. All registered student notification keys (`plateSyncNotifs_${studentEmail}`)
+ * 3. Default demo student key (`plateSyncNotifs_student@chitkara.edu.in`)
+ * 4. Active session user if student
+ * 5. Guest notification bucket (`plateSyncNotifs_guest`)
+ * 6. Dispatches 'plateSyncNotifUpdate' for live UI updates
+ */
+export function broadcastStudentNotification({
+  title,
+  message,
+  category = 'menu',
+  eventKey,
+  actionLabel = 'View Menu',
+  actionPage = 'menu',
+  targetRole = 'student',
+  extra = {},
+}) {
+  const timestamp = new Date().toISOString()
+  const key = eventKey || `broadcast_${category}_${Date.now()}`
+
+  const notif = {
+    id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    title,
+    message,
+    category,
+    eventKey: key,
+    actionLabel,
+    actionPage,
+    timestamp,
+    read: false,
+    targetRole,
+    ...extra,
+  }
+
+  // 1. Save to global broadcast store
+  try {
+    const raw = localStorage.getItem('plateSyncBroadcastNotifs')
+    const existing = raw ? JSON.parse(raw) : []
+    const list = Array.isArray(existing) ? existing : []
+    localStorage.setItem(
+      'plateSyncBroadcastNotifs',
+      JSON.stringify([notif, ...list.filter(item => item.eventKey !== key).slice(0, 49)])
+    )
+  } catch {
+    // storage full
+  }
+
+  // 2. Identify all student recipients
+  const studentEmails = new Set()
+  try {
+    const rawUsers = localStorage.getItem('plateSyncUsers')
+    if (rawUsers) {
+      const users = JSON.parse(rawUsers)
+      if (Array.isArray(users)) {
+        users.filter(u => u.role !== 'admin' && u.email).forEach(u => studentEmails.add(u.email))
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  try {
+    const current = JSON.parse(localStorage.getItem('plateSyncUser') || 'null')
+    if (current && current.role !== 'admin' && current.email) {
+      studentEmails.add(current.email)
+    }
+  } catch {
+    // ignore
+  }
+
+  studentEmails.add('student@chitkara.edu.in')
+
+  // Deliver to each student account
+  studentEmails.forEach(email => {
+    const storageKey = `plateSyncNotifs_${email}`
+    try {
+      const rawNotifs = localStorage.getItem(storageKey)
+      const existingNotifs = rawNotifs ? JSON.parse(rawNotifs) : []
+      const notifsArray = Array.isArray(existingNotifs) ? existingNotifs : []
+      if (!notifsArray.some(n => n.eventKey === key)) {
+        localStorage.setItem(storageKey, JSON.stringify([notif, ...notifsArray]))
+      }
+    } catch {
+      // ignore
+    }
+  })
+
+  // Deliver to guest bucket as well
+  try {
+    const guestKey = 'plateSyncNotifs_guest'
+    const rawGuest = localStorage.getItem(guestKey)
+    const existingGuest = rawGuest ? JSON.parse(rawGuest) : []
+    const guestArray = Array.isArray(existingGuest) ? existingGuest : []
+    if (!guestArray.some(n => n.eventKey === key)) {
+      localStorage.setItem(guestKey, JSON.stringify([notif, ...guestArray]))
+    }
+  } catch {
+    // ignore
+  }
+
+  // 3. Dispatch local custom event for immediate UI updates
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('plateSyncNotifUpdate', {
+      detail: { notif, ...extra }
+    }))
+  }
+
+  return notif
+}
+
+/**
+ * Specifically broadcast a menu change notification to all students when admin edits next meal.
+ */
+export function notifyStudentsOfMenuChange({ mealId, mealName, menuText, dateStr }) {
+  const clean = menuText?.trim() || ''
+  const dateLabel = dateStr || new Date().toISOString().slice(0, 10)
+  const eventKey = `menu_change_${mealId}_${dateLabel}_${Date.now()}`
+
+  return broadcastStudentNotification({
+    title: `Menu Update: ${mealName}`,
+    message: `The mess admin has updated the ${mealName} menu: "${clean}". View updated items and nutrition details before meal booking opens.`,
+    category: 'menu',
+    eventKey,
+    actionLabel: 'View Menu',
+    actionPage: 'menu',
+    targetRole: 'student',
+    extra: { mealId, mealName, menuText: clean, dateStr: dateLabel },
+  })
+}
 
 /**
  * Update the menu for the next eligible meal.
@@ -208,6 +362,7 @@ export function getWeeklyMenu(now = new Date()) {
  * - Reject if mealId is NOT the next eligible meal.
  * - Reject if student booking has already opened (`now >= bookingStart`).
  * - Persist valid changes and emit event for live synchronization.
+ * - Broadcasts notifications to all students so they receive the update immediately.
  */
 export function saveMealMenu({ mealId, menuText, now = new Date() }) {
   const nextInfo = getNextEligibleMeal(now)
@@ -235,14 +390,32 @@ export function saveMealMenu({ mealId, menuText, now = new Date() }) {
   }
 
   const overrides = getStoredOverrides()
+
+  // Remove any stale generic key (bare mealId) that could bleed across days
+  delete overrides[mealId]
+  // Remove stale date-specific keys for this mealId from past dates
+  Object.keys(overrides).forEach(k => {
+    if (k.endsWith(`_${mealId}`) && k !== `${nextInfo.dateStr}_${mealId}`) {
+      delete overrides[k]
+    }
+  })
+
+  // Only write the date-specific key
   const key = `${nextInfo.dateStr}_${mealId}`
   overrides[key] = cleanText
-  overrides[mealId] = cleanText
   saveOverrides(overrides)
+
+  // Broadcast notification to all students and guest viewers
+  const notif = notifyStudentsOfMenuChange({
+    mealId,
+    mealName: nextInfo.meal.name,
+    menuText: cleanText,
+    dateStr: nextInfo.dateStr,
+  })
 
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('plateSyncMenuUpdate', {
-      detail: { mealId, dateStr: nextInfo.dateStr, menu: cleanText }
+      detail: { mealId, dateStr: nextInfo.dateStr, menu: cleanText, mealName: nextInfo.meal.name, notif }
     }))
   }
 
@@ -251,6 +424,7 @@ export function saveMealMenu({ mealId, menuText, now = new Date() }) {
     meal: nextInfo.meal,
     menu: cleanText,
     dateStr: nextInfo.dateStr,
+    notif,
   }
 }
 

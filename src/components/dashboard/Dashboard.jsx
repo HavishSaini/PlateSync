@@ -9,6 +9,7 @@ import {
   getMealTimes,
   getAttendancePeriodInfo,
   saveMealMenu,
+  broadcastStudentNotification,
   parseDishesFromMenu,
   getDishNutrition,
   saveDishNutrition,
@@ -97,6 +98,14 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
         message: 'Meal bookings open 45 minutes before each meal. Next: Breakfast opens at 7:15 AM, Lunch at 11:45 AM.',
         category: 'reminder',
         eventKey: `booking_reminder_${user.email}_first`,
+      })
+      addNotification({
+        title: 'Daily Menu Confirmed',
+        message: "Today's meal menu is active. View items, schedule, and nutrition facts in the Menu tab.",
+        category: 'menu',
+        eventKey: `menu_confirmed_${user.email}_${new Date().toISOString().slice(0, 10)}`,
+        actionLabel: 'View Menu',
+        actionPage: 'menu',
       })
     } else if (user.role === 'admin') {
       syncAdminReportNotifications(user.email)
@@ -297,10 +306,10 @@ function NextMealEditor({ meal, isLocked }) {
     setSaving(false)
 
     if (res.success) {
-      setFeedback({ type: 'success', text: `Menu for ${meal.name} updated successfully!` })
+      setFeedback({ type: 'success', text: `Menu for ${meal.name} updated successfully! Students notified.` })
       addNotification({
         title: 'Menu Update Published',
-        message: `Admin updated ${meal.name} menu: "${menuText.trim()}"`,
+        message: `Admin updated ${meal.name} menu: "${menuText.trim()}" (Notification sent to all students)`,
         category: 'menu',
         eventKey: `admin_menu_change_${meal.id}_${Date.now()}`,
         actionLabel: 'View Menu',
@@ -641,11 +650,20 @@ function MealDishesNutritionEditor({ meal, isLocked }) {
       setSuccessMsg(`Nutrition details for "${dishName}" updated successfully!`)
       setTimeout(() => setSuccessMsg(null), 4000)
 
+      broadcastStudentNotification({
+        title: 'Dish Nutrition Updated',
+        message: `Nutrition and allergen information for "${dishName}" has been updated by the mess admin.`,
+        category: 'menu',
+        eventKey: `nutrition_edit_${dishName}_${Date.now()}`,
+        actionLabel: 'View Nutrition',
+        actionPage: 'nutrition',
+      })
+
       addNotification({
         title: 'Dish Nutrition Updated',
         message: `Admin updated nutrition and allergen facts for "${dishName}". Live on student portal.`,
         category: 'menu',
-        eventKey: `nutrition_edit_${dishName}_${Date.now()}`,
+        eventKey: `admin_nutrition_edit_${dishName}_${Date.now()}`,
         actionLabel: 'View Nutrition',
         actionPage: 'nutrition',
       })
@@ -759,11 +777,20 @@ function HostelDishLibrary() {
       setStatusMsg(`Nutrition details for "${dishName}" saved successfully!`)
       setTimeout(() => setStatusMsg(null), 4000)
 
+      broadcastStudentNotification({
+        title: 'Dish Nutrition Updated',
+        message: `Nutrition details for "${dishName}" have been updated in the curated mess catalog.`,
+        category: 'menu',
+        eventKey: `nutrition_edit_lib_${dishName}_${Date.now()}`,
+        actionLabel: 'View Nutrition',
+        actionPage: 'nutrition',
+      })
+
       addNotification({
         title: 'Dish Nutrition Updated',
         message: `Admin updated nutrition facts for "${dishName}".`,
         category: 'menu',
-        eventKey: `nutrition_edit_lib_${dishName}_${Date.now()}`,
+        eventKey: `admin_nutrition_edit_lib_${dishName}_${Date.now()}`,
         actionLabel: 'View Nutrition',
         actionPage: 'nutrition',
       })
