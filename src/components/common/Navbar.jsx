@@ -101,6 +101,14 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
           )}
         </div>
 
+        <button
+          onClick={() => onNavigate('how-to-use')}
+          className={page === 'how-to-use' ? 'active' : ''}
+          id="nav-about-btn"
+        >
+          About
+        </button>
+
         {user && (
           <button
             onClick={() => onNavigate('dashboard')}

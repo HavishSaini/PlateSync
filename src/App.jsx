@@ -40,9 +40,7 @@ export default function App() {
     () => JSON.parse(localStorage.getItem('plateSyncUser')) || null
   )
 
-  const [darkMode, setDarkMode] = useState(
-    () => localStorage.getItem('plateSyncDark') === 'true'
-  )
+  const [darkMode, setDarkMode] = useState(false)
 
   // Sync dark-mode preference
   useEffect(() => {
@@ -98,7 +96,12 @@ export default function App() {
             toggleDark={toggleDark}
           />
           <main>
-            {effectivePage === 'home'          && <Home onGetStarted={() => navigate(user ? 'dashboard' : 'login')} />}
+            {effectivePage === 'home'          && (
+              <Home
+                onGetStarted={() => navigate(user ? 'dashboard' : 'login')}
+                onNavigate={navigate}
+              />
+            )}
             {effectivePage === 'signup-page'   && <SignupPage onNavigate={navigate} />}
             {effectivePage === 'login'         && (
               <Login
@@ -113,7 +116,7 @@ export default function App() {
             {effectivePage === 'notifications' && <NotificationCenter onNavigate={navigate} />}
             {effectivePage === 'how-to-use'    && <HowToUse onNavigate={navigate} user={user} />}
           </main>
-          <Footer />
+          <Footer onNavigate={navigate} />
           {/* Global toast container — renders on top of everything */}
           <ToastContainer />
         </div>
