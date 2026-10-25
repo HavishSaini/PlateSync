@@ -1,4 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faChevronDown,
+  faCalendarDays,
+  faChartPie,
+  faBell,
+  faRightFromBracket,
+  faBookOpen,
+  faEnvelope,
+  faSun,
+  faMoon
+} from '@fortawesome/free-solid-svg-icons'
 import { useNotifications } from '../../context/NotificationContext'
 import './Navbar.css'
 
@@ -64,9 +76,7 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
               aria-label="Toggle menu options"
               id="nav-menu-chevron"
             >
-              <svg width="8" height="5" viewBox="0 0 8 5" fill="none" aria-hidden="true">
-                <path d="M1 1L4 4L7 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <FontAwesomeIcon icon={faChevronDown} style={{ fontSize: 10 }} />
             </button>
           </div>
 
@@ -78,7 +88,9 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                 onClick={() => { onNavigate('menu'); setMenuSubOpen(false) }}
                 id="nav-sub-menu"
               >
-                <span className="submenu-icon" aria-hidden="true">📅</span>
+                <span className="submenu-icon" aria-hidden="true">
+                  <FontAwesomeIcon icon={faCalendarDays} />
+                </span>
                 <div className="submenu-text">
                   <span className="submenu-title">Weekly Mess Menu</span>
                   <span className="submenu-desc">Schedule & day-by-day meals</span>
@@ -91,7 +103,9 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                 onClick={() => { onNavigate('nutrition'); setMenuSubOpen(false) }}
                 id="nav-sub-nutrition"
               >
-                <span className="submenu-icon" aria-hidden="true">🥗</span>
+                <span className="submenu-icon" aria-hidden="true">
+                  <FontAwesomeIcon icon={faChartPie} />
+                </span>
                 <div className="submenu-text">
                   <span className="submenu-title">Nutrition & Allergens</span>
                   <span className="submenu-desc">Calories, macros & dietary safety</span>
@@ -134,7 +148,9 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
               title="Notification Center"
               id="nav-bell"
             >
-              <span className="nav-bell-icon" aria-hidden="true">🔔</span>
+              <span className="nav-bell-icon" aria-hidden="true">
+                <FontAwesomeIcon icon={faBell} />
+              </span>
               {unreadCount > 0 && (
                 <span className="nav-bell-badge" aria-hidden="true">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -147,6 +163,7 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
               id="nav-logout"
               onClick={onLogout}
             >
+              <FontAwesomeIcon icon={faRightFromBracket} style={{ marginRight: 6 }} />
               Log out
             </button>
           </div>
@@ -191,7 +208,9 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                 onClick={() => { toggleDark(); setMenuOpen(false) }}
                 role="menuitem"
               >
-                <span className="toggle-icon">{darkMode ? '☀️' : '🌙'}</span>
+                <span className="toggle-icon">
+                  <FontAwesomeIcon icon={darkMode ? faSun : faMoon} />
+                </span>
                 <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
                 <span className={`toggle-pill${darkMode ? ' on' : ''}`} />
               </button>
@@ -205,7 +224,9 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                 role="menuitem"
                 id="ham-how-to-use"
               >
-                <span className="ham-nav-icon">📖</span>
+                <span className="ham-nav-icon">
+                  <FontAwesomeIcon icon={faBookOpen} />
+                </span>
                 <span className="ham-nav-text">How to Use</span>
                 <span className="ham-nav-badge">Guide</span>
               </button>
@@ -216,7 +237,9 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                 role="menuitem"
                 id="ham-contact-us"
               >
-                <span className="ham-nav-icon">💬</span>
+                <span className="ham-nav-icon">
+                  <FontAwesomeIcon icon={faEnvelope} />
+                </span>
                 <span className="ham-nav-text">Contact Us</span>
               </button>
             </div>

@@ -132,7 +132,7 @@ export function NotificationProvider({ user, children }) {
       const notif = e?.detail?.notif
       if (notif && userRef.current?.role !== 'admin' && notif.category === 'menu') {
         addToast?.({
-          message: `📢 ${notif.title}: Menu has been updated by the admin!`,
+          message: `${notif.title}: Menu has been updated by the admin!`,
           type: 'info',
           duration: 5000,
         })

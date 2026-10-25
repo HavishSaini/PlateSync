@@ -1,10 +1,112 @@
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faCircleCheck,
+  faArrowLeft,
+  faArrowRight
+} from '@fortawesome/free-solid-svg-icons'
 import './Signup.css'
+
 const hostels = ['Alfred Noble-A', 'Alfred Noble-B', 'Archimedes-A', 'Archimedes-B', 'Franklin-A', 'Franklin-B', 'Magellan']
+
 export default function Signup({ role, onSubmit, onBack }) {
   const [form, setForm] = useState({ fullName: '', rollNo: '', hostel: '', room: '', messId: '', staffId: '', email: '' })
   const [error, setError] = useState('')
+
   const updateField = (event) => setForm({ ...form, [event.target.name]: event.target.value })
-  const submitForm = (event) => { event.preventDefault(); if (!form.email.endsWith('@chitkara.edu.in')) { setError('Please enter your Chitkara email ending in @chitkara.edu.in'); return } onSubmit({ ...form, role }) }
-  return <section className="signup-page"><div className="signup-intro"><p className="section-label">{role === 'admin' ? 'MESS ADMIN ACCOUNT' : 'STUDENT ACCOUNT'}</p><h1>Join the change,<br/><em>one plate at a time.</em></h1><p>Fill in your hostel details to enter the PlateSync demo. Your information stays in this browser using LocalStorage.</p><ul><li>✓ Real Chitkara mess menu</li><li>✓ Approximate waste data</li><li>✓ Simple meal-booking demo</li></ul></div><form className="signup-form" onSubmit={submitForm}><button type="button" className="back-button" onClick={onBack}>← Choose another role</button><h2>Create your account</h2><label>Full name<input name="fullName" value={form.fullName} onChange={updateField} placeholder="Enter your full name" required /></label><label>Hostel name<select name="hostel" value={form.hostel} onChange={updateField} required><option value="">Select hostel</option>{hostels.map(hostel => <option key={hostel}>{hostel}</option>)}</select></label>{role === 'admin' ? <><label>Mess ID<input name="messId" value={form.messId} onChange={updateField} placeholder="Enter mess ID" required /></label><label>Staff ID<input name="staffId" value={form.staffId} onChange={updateField} placeholder="Enter staff ID" required /></label></> : <><label>Roll number<input name="rollNo" value={form.rollNo} onChange={updateField} placeholder="Enter your roll number" required /></label><label>Room number<input name="room" value={form.room} onChange={updateField} placeholder="Enter room number" required /></label></>}<label>Chitkara email<input type="email" name="email" value={form.email} onChange={updateField} placeholder="name@chitkara.edu.in" required /></label>{error && <p className="form-error">{error}</p>}<button className="primary-button signup-submit">Create account →</button></form></section>
+
+  const submitForm = (event) => {
+    event.preventDefault()
+    if (!form.email.endsWith('@chitkara.edu.in')) {
+      setError('Please enter your Chitkara email ending in @chitkara.edu.in')
+      return
+    }
+    onSubmit({ ...form, role })
+  }
+
+  return (
+    <section className="signup-page">
+      <div className="signup-intro">
+        <p className="section-label">{role === 'admin' ? 'MESS ADMIN ACCOUNT' : 'STUDENT ACCOUNT'}</p>
+        <h1>
+          Join the change,<br />
+          <em>one plate at a time.</em>
+        </h1>
+        <p>
+          Fill in your hostel details to enter the PlateSync demo. Your information stays in this browser using LocalStorage.
+        </p>
+        <ul>
+          <li>
+            <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#138052', marginRight: 8 }} />
+            Real Chitkara mess menu
+          </li>
+          <li>
+            <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#138052', marginRight: 8 }} />
+            Approximate waste data
+          </li>
+          <li>
+            <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#138052', marginRight: 8 }} />
+            Simple meal-booking demo
+          </li>
+        </ul>
+      </div>
+
+      <form className="signup-form" onSubmit={submitForm}>
+        <button type="button" className="back-button" onClick={onBack}>
+          <FontAwesomeIcon icon={faArrowLeft} style={{ marginRight: 6 }} />
+          Choose another role
+        </button>
+        <h2>Create your account</h2>
+
+        <label>
+          Full name
+          <input name="fullName" value={form.fullName} onChange={updateField} placeholder="Enter your full name" required />
+        </label>
+
+        <label>
+          Hostel name
+          <select name="hostel" value={form.hostel} onChange={updateField} required>
+            <option value="">Select hostel</option>
+            {hostels.map(hostel => <option key={hostel}>{hostel}</option>)}
+          </select>
+        </label>
+
+        {role === 'admin' ? (
+          <>
+            <label>
+              Mess ID
+              <input name="messId" value={form.messId} onChange={updateField} placeholder="Enter mess ID" required />
+            </label>
+            <label>
+              Staff ID
+              <input name="staffId" value={form.staffId} onChange={updateField} placeholder="Enter staff ID" required />
+            </label>
+          </>
+        ) : (
+          <>
+            <label>
+              Roll number
+              <input name="rollNo" value={form.rollNo} onChange={updateField} placeholder="Enter your roll number" required />
+            </label>
+            <label>
+              Room number
+              <input name="room" value={form.room} onChange={updateField} placeholder="Enter room number" required />
+            </label>
+          </>
+        )}
+
+        <label>
+          Chitkara email
+          <input type="email" name="email" value={form.email} onChange={updateField} placeholder="name@chitkara.edu.in" required />
+        </label>
+
+        {error && <p className="form-error">{error}</p>}
+
+        <button className="primary-button signup-submit">
+          Create account
+          <FontAwesomeIcon icon={faArrowRight} style={{ marginLeft: 6 }} />
+        </button>
+      </form>
+    </section>
+  )
 }

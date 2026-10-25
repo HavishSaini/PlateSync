@@ -1,4 +1,14 @@
 import { useCallback, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faPaperclip,
+  faCommentDots,
+  faCircleCheck,
+  faCircleInfo,
+  faInbox,
+  faMagnifyingGlass,
+  faTriangleExclamation
+} from '@fortawesome/free-solid-svg-icons'
 import {
   getAllReports,
   updateReport,
@@ -76,7 +86,7 @@ function AdminReportDetail({ report, onBack, onUpdated }) {
     // Notify the student about the status change
     if (statusChanged) {
       addNotificationForUser(report.reporterEmail, {
-        title: `Report ${newStatus === 'Resolved' ? 'Resolved ✅' : 'Updated'}`,
+        title: `Report ${newStatus === 'Resolved' ? 'Resolved' : 'Updated'}`,
         message: `Your report "${report.title}" (${report.id}) has been updated to: ${newStatus}.${adminResponse.trim() ? ` Admin note: "${adminResponse.trim().slice(0, 80)}"` : ''}`,
         category: 'announcement',
         eventKey: `report_status_${report.id}_${newStatus}`,
@@ -141,7 +151,10 @@ function AdminReportDetail({ report, onBack, onUpdated }) {
         <p>{report.description}</p>
         {report.attachmentDataUrl && (
           <div className="ir-detail-attachment">
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>📎 Attached photo:</p>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+              <FontAwesomeIcon icon={faPaperclip} style={{ marginRight: 6 }} />
+              Attached photo:
+            </p>
             <img src={report.attachmentDataUrl} alt="Attached" onClick={() => setImgOpen(true)} style={{ cursor: 'zoom-in' }} />
           </div>
         )}
@@ -178,7 +191,12 @@ function AdminReportDetail({ report, onBack, onUpdated }) {
             >
               {saving ? 'Saving…' : 'Save Changes'}
             </button>
-            {saveMsg && <span style={{ fontSize: 13, color: 'var(--accent)' }}>✓ {saveMsg}</span>}
+            {saveMsg && (
+              <span style={{ fontSize: 13, color: 'var(--accent)' }}>
+                <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 5 }} />
+                {saveMsg}
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -192,7 +210,10 @@ function AdminReportDetail({ report, onBack, onUpdated }) {
       {/* Current admin response */}
       {report.adminResponse && (
         <div className="ir-admin-response">
-          <h4>💬 Current Admin Response</h4>
+          <h4>
+            <FontAwesomeIcon icon={faCommentDots} style={{ marginRight: 6 }} />
+            Current Admin Response
+          </h4>
           <p>{report.adminResponse}</p>
         </div>
       )}
@@ -298,13 +319,16 @@ function AdminReportList({ reports, onSelect }) {
 
       {/* Disclaimer */}
       <p className="ir-disclaimer">
-        ℹ️ Reports are stored locally in this browser. In this shared demo session (same browser), all student reports are visible to the admin. Cross-device sync and real-time updates require a backend.
+        <FontAwesomeIcon icon={faCircleInfo} style={{ marginRight: 6 }} />
+        Reports are stored locally in this browser. In this shared demo session (same browser), all student reports are visible to the admin. Cross-device sync and real-time updates require a backend.
       </p>
 
       {/* Report rows */}
       {filtered.length === 0 ? (
         <div className="ir-empty">
-          <span className="ir-empty-icon">{reports.length === 0 ? '📭' : '🔍'}</span>
+          <span className="ir-empty-icon">
+            <FontAwesomeIcon icon={reports.length === 0 ? faInbox : faMagnifyingGlass} />
+          </span>
           <h3>{reports.length === 0 ? 'No reports yet' : 'No reports match these filters'}</h3>
           <p>{reports.length === 0 ? 'Students can file issue reports from their dashboard.' : 'Try adjusting the filters above.'}</p>
         </div>
@@ -323,7 +347,9 @@ function AdminReportList({ reports, onSelect }) {
             >
               <div className="ir-admin-row-main">
                 <div className="ir-admin-row-title">
-                  {r.severity === 'Urgent' && <span style={{ marginRight: 6 }}>🚨</span>}
+                  {r.severity === 'Urgent' && (
+                    <FontAwesomeIcon icon={faTriangleExclamation} style={{ marginRight: 6, color: 'var(--red, #c0392b)' }} />
+                  )}
                   {r.title}
                 </div>
                 <div className="ir-admin-row-sub">

@@ -1,4 +1,13 @@
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faLocationDot,
+  faEnvelope,
+  faPhone,
+  faClock,
+  faCircleCheck,
+  faPaperPlane
+} from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
 import './ContactUs.css'
 
@@ -63,7 +72,7 @@ export default function ContactUs({ onNavigate: _onNavigate, user }) {
     <div className="contact-page">
       {/* Hero Header */}
       <div className="contact-hero">
-        <span className="contact-kicker">💬 GET IN TOUCH</span>
+        <span className="contact-kicker">GET IN TOUCH</span>
         <h1>Contact Mess Administration</h1>
         <p>
           Have questions about your meal plan, special dietary requests, menu suggestions, or cafeteria operations?
@@ -82,7 +91,9 @@ export default function ContactUs({ onNavigate: _onNavigate, user }) {
 
             <div className="contact-details-list">
               <div className="contact-detail-row">
-                <span className="contact-icon-bubble" aria-hidden="true">📍</span>
+                <span className="contact-icon-bubble" aria-hidden="true">
+                  <FontAwesomeIcon icon={faLocationDot} />
+                </span>
                 <div className="contact-detail-text">
                   <strong>Campus Location</strong>
                   <span>Central Dining Hall, Chitkara University, Punjab</span>
@@ -90,7 +101,9 @@ export default function ContactUs({ onNavigate: _onNavigate, user }) {
               </div>
 
               <div className="contact-detail-row">
-                <span className="contact-icon-bubble" aria-hidden="true">✉️</span>
+                <span className="contact-icon-bubble" aria-hidden="true">
+                  <FontAwesomeIcon icon={faEnvelope} />
+                </span>
                 <div className="contact-detail-text">
                   <strong>Email Administration</strong>
                   <span>mess.support@chitkara.edu.in</span>
@@ -98,7 +111,9 @@ export default function ContactUs({ onNavigate: _onNavigate, user }) {
               </div>
 
               <div className="contact-detail-row">
-                <span className="contact-icon-bubble" aria-hidden="true">📞</span>
+                <span className="contact-icon-bubble" aria-hidden="true">
+                  <FontAwesomeIcon icon={faPhone} />
+                </span>
                 <div className="contact-detail-text">
                   <strong>Helpline / Counter</strong>
                   <span>+91 9056978368</span>
@@ -110,7 +125,10 @@ export default function ContactUs({ onNavigate: _onNavigate, user }) {
           <div className="contact-hostel-hours">
             <h4>Office & Help Desk Hours</h4>
             <p>Direct assistance is available at the cafeteria administrative counter during meal service intervals.</p>
-            <span className="hours-pill">🕒 Open Daily: 07:00 AM – 10:00 PM</span>
+            <span className="hours-pill">
+              <FontAwesomeIcon icon={faClock} style={{ marginRight: 6 }} />
+              Open Daily: 07:00 AM – 10:00 PM
+            </span>
           </div>
         </div>
 
@@ -123,7 +141,9 @@ export default function ContactUs({ onNavigate: _onNavigate, user }) {
 
           {submitted ? (
             <div className="contact-success-banner" role="alert">
-              <span style={{ fontSize: 22 }} aria-hidden="true">✅</span>
+              <span style={{ fontSize: 24, color: '#138052' }} aria-hidden="true">
+                <FontAwesomeIcon icon={faCircleCheck} />
+              </span>
               <div>
                 <strong>Thank you, {formData.name.split(' ')[0]}!</strong>
                 <p>
@@ -231,7 +251,12 @@ export default function ContactUs({ onNavigate: _onNavigate, user }) {
                 disabled={loading}
                 id="contact-form-submit-btn"
               >
-                {loading ? 'Sending...' : 'Send Message →'}
+                {loading ? 'Sending...' : (
+                  <>
+                    <FontAwesomeIcon icon={faPaperPlane} style={{ marginRight: 8 }} />
+                    Send Message
+                  </>
+                )}
               </button>
             </form>
           )}

@@ -1,4 +1,17 @@
 import { useState, useMemo } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faCalendarCheck,
+  faBullhorn,
+  faClock,
+  faUtensils,
+  faCircleInfo,
+  faBell,
+  faBellSlash,
+  faCheckDouble,
+  faXmark,
+  faArrowRight
+} from '@fortawesome/free-solid-svg-icons'
 import { useNotifications } from '../../context/NotificationContext'
 import './NotificationCenter.css'
 
@@ -14,11 +27,11 @@ const CATEGORY_LABELS = {
 }
 
 const CATEGORY_ICONS = {
-  booking:      '🍽️',
-  announcement: '📢',
-  reminder:     '⏰',
-  menu:         '📋',
-  general:      'ℹ️',
+  booking:      faCalendarCheck,
+  announcement: faBullhorn,
+  reminder:     faClock,
+  menu:         faUtensils,
+  general:      faCircleInfo,
 }
 
 const FILTERS = ['All', 'Unread', 'Bookings', 'Announcements', 'Reminders', 'Menu']
@@ -56,13 +69,14 @@ function formatDate(isoString) {
 // Notification Card
 // ---------------------------------------------------------------------------
 function NotifCard({ notif, onRead, onDelete, onAction }) {
+  const icon = CATEGORY_ICONS[notif.category] || faBell
   return (
     <article
       className={`nc-card${notif.read ? '' : ' nc-card--unread'}`}
       onClick={() => !notif.read && onRead(notif.id)}
     >
       <div className="nc-card-icon" aria-hidden="true">
-        {CATEGORY_ICONS[notif.category] || '🔔'}
+        <FontAwesomeIcon icon={icon} />
       </div>
       <div className="nc-card-body">
         <div className="nc-card-header">
@@ -84,7 +98,7 @@ function NotifCard({ notif, onRead, onDelete, onAction }) {
             onClick={(e) => { e.stopPropagation(); onAction(notif) }}
             aria-label={notif.actionLabel}
           >
-            {notif.actionLabel} →
+            {notif.actionLabel} <FontAwesomeIcon icon={faArrowRight} style={{ fontSize: 11, marginLeft: 4 }} />
           </button>
         )}
       </div>
@@ -94,7 +108,7 @@ function NotifCard({ notif, onRead, onDelete, onAction }) {
         aria-label="Delete notification"
         title="Delete"
       >
-        ✕
+        <FontAwesomeIcon icon={faXmark} />
       </button>
     </article>
   )
@@ -105,17 +119,19 @@ function NotifCard({ notif, onRead, onDelete, onAction }) {
 // ---------------------------------------------------------------------------
 function EmptyState({ filter }) {
   const msgs = {
-    All:           { icon: '🔔', title: 'No notifications yet', sub: 'You\'ll see booking confirmations, announcements, and menu updates here.' },
-    Unread:        { icon: '✅', title: 'All caught up!', sub: 'No unread notifications.' },
-    Bookings:      { icon: '🍽️', title: 'No booking notifications', sub: 'Book a meal and the confirmation will appear here.' },
-    Announcements: { icon: '📢', title: 'No announcements', sub: 'Admin announcements will appear here.' },
-    Reminders:     { icon: '⏰', title: 'No reminders', sub: 'Upcoming meal deadlines will be shown here.' },
-    Menu:          { icon: '📋', title: 'No menu updates', sub: 'When the mess menu changes, you\'ll be notified here.' },
+    All:           { icon: faBellSlash, title: 'No notifications yet', sub: "You'll see booking confirmations, announcements, and menu updates here." },
+    Unread:        { icon: faCheckDouble, title: 'All caught up!', sub: 'No unread notifications.' },
+    Bookings:      { icon: faCalendarCheck, title: 'No booking notifications', sub: 'Book a meal and the confirmation will appear here.' },
+    Announcements: { icon: faBullhorn, title: 'No announcements', sub: 'Admin announcements will appear here.' },
+    Reminders:     { icon: faClock, title: 'No reminders', sub: 'Upcoming meal deadlines will be shown here.' },
+    Menu:          { icon: faUtensils, title: 'No menu updates', sub: "When the mess menu changes, you'll be notified here." },
   }
   const { icon, title, sub } = msgs[filter] || msgs.All
   return (
     <div className="nc-empty">
-      <span className="nc-empty-icon" aria-hidden="true">{icon}</span>
+      <span className="nc-empty-icon" aria-hidden="true">
+        <FontAwesomeIcon icon={icon} />
+      </span>
       <h3>{title}</h3>
       <p>{sub}</p>
     </div>
@@ -191,7 +207,8 @@ export default function NotificationCenter({ onNavigate }) {
 
       {/* Notice: frontend-only */}
       <p className="nc-disclaimer">
-        ℹ️ Notifications are saved locally in this browser. Cross-device sync requires a backend.
+        <FontAwesomeIcon icon={faCircleInfo} style={{ marginRight: 6 }} />
+        Notifications are saved locally in this browser. Cross-device sync requires a backend.
       </p>
 
       {/* List */}

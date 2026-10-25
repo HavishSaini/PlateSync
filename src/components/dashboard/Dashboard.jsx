@@ -22,7 +22,36 @@ import {
 } from '../../utils/attendanceStorage'
 import IssueReportView from '../issues/IssueReportView'
 import AdminIssueView from '../issues/AdminIssueView'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faCheck,
+  faTriangleExclamation,
+  faQuestion,
+  faPen,
+  faLock,
+  faCircleInfo,
+  faSun,
+  faBowlFood,
+  faMugHot,
+  faMoon,
+  faUtensils,
+} from '@fortawesome/free-solid-svg-icons'
 import './Dashboard.css'
+
+function getMealIcon(mealId) {
+  switch (mealId) {
+    case 'breakfast':
+      return <FontAwesomeIcon icon={faSun} style={{ color: '#E09F3E' }} />
+    case 'lunch':
+      return <FontAwesomeIcon icon={faBowlFood} style={{ color: 'var(--primary, #138052)' }} />
+    case 'snacks':
+      return <FontAwesomeIcon icon={faMugHot} style={{ color: '#D97706' }} />
+    case 'dinner':
+      return <FontAwesomeIcon icon={faMoon} style={{ color: '#6366F1' }} />
+    default:
+      return <FontAwesomeIcon icon={faUtensils} style={{ color: 'var(--primary, #138052)' }} />
+  }
+}
 
 const studentTabs = ['Today\u2019s meals', 'My attendance', 'My impact', 'Report issue']
 const adminTabs   = ['Live demand', 'Mark attendance', 'Menu management', 'Waste analysis', 'Issue reports']
@@ -279,7 +308,7 @@ function AdminView({ activeTab, user, currentTime }) {
 
   if (activeTab === 'Issue reports') return <AdminIssueView user={user} />
   if (activeTab === 'Menu management') return <AdminMenuManagement currentTime={currentTime} user={user} />
-  if (activeTab === 'Mark attendance') return <section className="admin-form"><p className="section-label">MESS STAFF ACTION</p><h2>Mark student attendance</h2><p>Enter the student roll number after serving their booked meal.</p><form onSubmit={markAttendance}><label>Student roll number<input value={rollNo} onChange={event => setRollNo(event.target.value)} placeholder="Enter roll number" /></label><button className="primary-button">Mark attended ✓</button></form>{notice && <p className="notice">{notice}</p>}<div className="attendance-total"><strong>{attendance}</strong><span>students marked attended in this session</span></div></section>
+  if (activeTab === 'Mark attendance') return <section className="admin-form"><p className="section-label">MESS STAFF ACTION</p><h2>Mark student attendance</h2><p>Enter the student roll number after serving their booked meal.</p><form onSubmit={markAttendance}><label>Student roll number<input value={rollNo} onChange={event => setRollNo(event.target.value)} placeholder="Enter roll number" /></label><button className="primary-button"><FontAwesomeIcon icon={faCheck} style={{ marginRight: 6 }} />Mark attended</button></form>{notice && <p className="notice">{notice}</p>}<div className="attendance-total"><strong>{attendance}</strong><span>students marked attended in this session</span></div></section>
   if (activeTab === 'Waste analysis') return <WasteAnalysis />
   return <LiveDemand />
 }
@@ -343,7 +372,7 @@ function NextMealEditor({ meal, isLocked }) {
           disabled={isLocked || saving || !menuText.trim() || menuText.trim() === meal.menu}
           id="admin-save-menu-btn"
         >
-          {saving ? 'Saving…' : 'Save Menu Changes ✓'}
+          {saving ? 'Saving…' : <><FontAwesomeIcon icon={faCheck} style={{ marginRight: 6 }} />Save Menu Changes</>}
         </button>
         {feedback && (
           <span className={feedback.type === 'success' ? 'menu-mgmt-success' : 'menu-mgmt-error'}>
@@ -609,7 +638,7 @@ function DishEditModal({ dish, onClose, onSave }) {
               Cancel
             </button>
             <button type="submit" className="primary-button" disabled={saving} id="dish-modal-save-btn">
-              {saving ? 'Saving...' : 'Save Dish Details ✓'}
+              {saving ? 'Saving...' : <><FontAwesomeIcon icon={faCheck} style={{ marginRight: 6 }} />Save Dish Details</>}
             </button>
           </div>
         </form>
@@ -696,9 +725,9 @@ function MealDishesNutritionEditor({ meal, isLocked }) {
               <div className="dish-mgmt-item-header">
                 <h5 className="dish-mgmt-item-name">{dish.name}</h5>
                 {dish.verified ? (
-                  <span className="v-badge verified" style={{ fontSize: 10 }}>✓ Verified</span>
+                  <span className="v-badge verified" style={{ fontSize: 10 }}><FontAwesomeIcon icon={faCheck} style={{ marginRight: 4 }} />Verified</span>
                 ) : (
-                  <span className="v-badge unverified" style={{ fontSize: 10 }}>⚠️ Estimate</span>
+                  <span className="v-badge unverified" style={{ fontSize: 10 }}><FontAwesomeIcon icon={faTriangleExclamation} style={{ marginRight: 4 }} />Estimate</span>
                 )}
               </div>
 
@@ -718,13 +747,13 @@ function MealDishesNutritionEditor({ meal, isLocked }) {
                 {confirmed.length > 0 ? (
                   confirmed.map(a => (
                     <span key={a} className="admin-allergen-tag confirmed">
-                      ⚠️ {a}
+                      <><FontAwesomeIcon icon={faTriangleExclamation} style={{ marginRight: 4 }} />{a}</>
                     </span>
                   ))
                 ) : dish.verified ? (
-                  <span className="admin-allergen-tag safe">✓ No common allergens</span>
+                  <span className="admin-allergen-tag safe"><FontAwesomeIcon icon={faCheck} style={{ marginRight: 4 }} />No common allergens</span>
                 ) : (
-                  <span className="admin-allergen-tag unknown">❓ Unknown allergen status</span>
+                  <span className="admin-allergen-tag unknown"><FontAwesomeIcon icon={faQuestion} style={{ marginRight: 4 }} />Unknown allergen status</span>
                 )}
               </div>
 
@@ -734,7 +763,7 @@ function MealDishesNutritionEditor({ meal, isLocked }) {
                 onClick={() => setEditingDish(dish)}
                 id={`edit-dish-${dish.name.toLowerCase().replace(/\s+/g, '-')}`}
               >
-                Edit Nutrition & Allergens ✏️
+                <FontAwesomeIcon icon={faPen} style={{ marginRight: 6 }} />Edit Nutrition & Allergens
               </button>
             </div>
           )
@@ -818,7 +847,7 @@ function HostelDishLibrary() {
           <option value="">-- Choose a dish to inspect or edit --</option>
           {allDishes.map(d => (
             <option key={d.norm} value={d.name}>
-              {d.name} ({d.primaryMeal}) {d.verified ? '✓ Verified' : '⚠️ Unverified'}
+              {d.name} ({d.primaryMeal}) {d.verified ? '[Verified]' : '[Estimate]'}
             </option>
           ))}
         </select>
@@ -831,7 +860,7 @@ function HostelDishLibrary() {
             onClick={() => setEditingDish(selectedDish)}
             id="admin-edit-selected-dish-btn"
           >
-            Edit {selectedDish.name} Details ✏️
+            <><FontAwesomeIcon icon={faPen} style={{ marginRight: 6 }} />Edit {selectedDish.name} Details</>
           </button>
         )}
 
@@ -867,7 +896,9 @@ function AdminMenuManagement({ currentTime, user }) {
       <div className="menu-mgmt-card">
         <div className="menu-mgmt-card-top">
           <div className="menu-mgmt-card-title">
-            <span style={{ fontSize: 26 }} aria-hidden="true">{meal.icon}</span>
+            <span style={{ fontSize: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} aria-hidden="true">
+              {getMealIcon(meal.id)}
+            </span>
             <div>
               <h3>Next Eligible Meal: {meal.name}</h3>
               <small>{isTomorrow ? 'Tomorrow' : 'Today'} ({dateStr}) · Serving: {meal.time}</small>
@@ -875,20 +906,20 @@ function AdminMenuManagement({ currentTime, user }) {
           </div>
           <div>
             {isLocked ? (
-              <span className="menu-badge menu-badge-locked">🔒 Booking Open (Locked)</span>
+              <span className="menu-badge menu-badge-locked"><FontAwesomeIcon icon={faLock} style={{ marginRight: 5 }} />Booking Open (Locked)</span>
             ) : (
-              <span className="menu-badge menu-badge-editable">✏️ Booking Closed (Editable)</span>
+              <span className="menu-badge menu-badge-editable"><FontAwesomeIcon icon={faPen} style={{ marginRight: 5 }} />Booking Closed (Editable)</span>
             )}
           </div>
         </div>
 
         {isLocked ? (
           <div className="menu-mgmt-notice locked" role="alert">
-            ⚠️ {lockReason || 'Menu locked because student booking has started.'} Modifications to this meal menu are no longer accepted. Existing dish nutrition details can still be updated.
+            <><FontAwesomeIcon icon={faTriangleExclamation} style={{ marginRight: 6 }} />{lockReason || 'Menu locked because student booking has started.'}</> Modifications to this meal menu are no longer accepted. Existing dish nutrition details can still be updated.
           </div>
         ) : (
           <div className="menu-mgmt-notice editable">
-            ℹ️ Student booking opens in <strong>{minutesToBooking} minutes</strong> (at {formatTime(bookingStart)}). You can adjust and save menu items now.
+            <FontAwesomeIcon icon={faCircleInfo} style={{ marginRight: 6 }} />Student booking opens in <strong>{minutesToBooking} minutes</strong> (at {formatTime(bookingStart)}). You can adjust and save menu items now.
           </div>
         )}
 
@@ -942,7 +973,10 @@ function AdminMenuManagement({ currentTime, user }) {
 
             return (
               <div key={m.id} className={`schedule-row${isTarget ? ' active' : ''}`}>
-                <strong>{m.icon} {m.name}</strong>
+                <strong>
+                  <span style={{ marginRight: 6 }}>{getMealIcon(m.id)}</span>
+                  {m.name}
+                </strong>
                 <span>{m.time}</span>
                 <span>Opens {formatTime(mBookStart)}</span>
                 <span>{badge}</span>
@@ -1012,7 +1046,7 @@ function LiveDemand() {
 
       {hasEstimate && (
         <p className="notice" style={{ marginTop: 12 }}>
-          ℹ️ Meals marked with <strong>Estimate</strong> do not have recorded historical actual attendance, so they reflect expected attendance without an added buffer.
+          <FontAwesomeIcon icon={faCircleInfo} style={{ marginRight: 6 }} />Meals marked with <strong>Estimate</strong> do not have recorded historical actual attendance, so they reflect expected attendance without an added buffer.
         </p>
       )}
 

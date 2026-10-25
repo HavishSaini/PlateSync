@@ -1,4 +1,12 @@
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faEye,
+  faEyeSlash,
+  faCircleCheck,
+  faCircle,
+  faArrowRight
+} from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
 import './SignupPage.css'
 
@@ -67,7 +75,7 @@ export default function SignupPage({ onNavigate }) {
 
       // Toast on successful signup
       addToast({
-        message: `Account created! Welcome to PlateSync, ${form.fullName?.split(' ')[0] || 'there'}! 🎉`,
+        message: `Account created! Welcome to PlateSync, ${form.fullName?.split(' ')[0] || 'there'}!`,
         type: 'success',
         duration: 5000,
       })
@@ -228,7 +236,7 @@ export default function SignupPage({ onNavigate }) {
                 onClick={() => setShowPass(p => !p)}
                 aria-label={showPass ? 'Hide password' : 'Show password'}
               >
-                {showPass ? '🙈' : '👁️'}
+                <FontAwesomeIcon icon={showPass ? faEyeSlash : faEye} />
               </button>
             </div>
 
@@ -236,7 +244,9 @@ export default function SignupPage({ onNavigate }) {
               <div className="sp-password-rules" aria-live="polite">
                 {passwordRules.map(rule => (
                   <div key={rule.id} className={`sp-rule-item${rule.met ? ' met' : ''}`}>
-                    <span className="sp-rule-icon">{rule.met ? '✓' : '○'}</span>
+                    <span className="sp-rule-icon">
+                      <FontAwesomeIcon icon={rule.met ? faCircleCheck : faCircle} style={{ fontSize: 10 }} />
+                    </span>
                     <span>{rule.label}</span>
                   </div>
                 ))}
@@ -252,7 +262,12 @@ export default function SignupPage({ onNavigate }) {
             id="sp-submit-btn"
             disabled={loading}
           >
-            {loading ? 'Creating account...' : 'Create account ->'}
+            {loading ? 'Creating account...' : (
+              <>
+                Create account
+                <FontAwesomeIcon icon={faArrowRight} style={{ marginLeft: 6 }} />
+              </>
+            )}
           </button>
         </form>
 

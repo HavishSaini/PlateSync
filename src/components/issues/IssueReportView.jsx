@@ -1,4 +1,18 @@
 import { useCallback, useRef, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faClipboardList,
+  faFolderOpen,
+  faCamera,
+  faPaperclip,
+  faXmark,
+  faInbox,
+  faCalendarDays,
+  faCommentDots,
+  faCircleCheck,
+  faCircleInfo,
+  faArrowRight
+} from '@fortawesome/free-solid-svg-icons'
 import {
   addReport,
   getStudentReports,
@@ -144,7 +158,10 @@ function ReportForm({ user, onSuccess, onCancel }) {
   return (
     <form className="ir-form" onSubmit={handleSubmit} noValidate id="issue-report-form">
       <div className="ir-topbar">
-        <h2>📋 New Report</h2>
+        <h2>
+          <FontAwesomeIcon icon={faClipboardList} style={{ marginRight: 8, color: 'var(--accent)' }} />
+          New Report
+        </h2>
         <div className="ir-topbar-actions">
           <button type="button" className="secondary-button" onClick={() => { if (isDirty && !window.confirm('Discard this report?')) return; onCancel() }}>
             Cancel
@@ -153,7 +170,8 @@ function ReportForm({ user, onSuccess, onCancel }) {
       </div>
 
       <p className="ir-disclaimer">
-        ℹ️ Your hostel and identity are taken from your profile. Reports are stored locally in this browser — cross-device sync requires a backend.
+        <FontAwesomeIcon icon={faCircleInfo} style={{ marginRight: 6 }} />
+        Your hostel and identity are taken from your profile. Reports are stored locally in this browser — cross-device sync requires a backend.
       </p>
 
       <div className="ir-form-grid">
@@ -246,14 +264,26 @@ function ReportForm({ user, onSuccess, onCancel }) {
           <div className="ir-file-wrap" onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0}
             onKeyDown={e => e.key === 'Enter' && fileInputRef.current?.click()}>
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} aria-label="Upload photo" />
-            {attachment ? '📎 Photo attached — click to change' : '📷 Click to attach a photo'}
+            {attachment ? (
+              <span>
+                <FontAwesomeIcon icon={faPaperclip} style={{ marginRight: 6 }} />
+                Photo attached — click to change
+              </span>
+            ) : (
+              <span>
+                <FontAwesomeIcon icon={faCamera} style={{ marginRight: 6 }} />
+                Click to attach a photo
+              </span>
+            )}
           </div>
           {errors.attachment && <span className="ir-field-error">{errors.attachment}</span>}
           {attachment && (
             <div className="ir-file-preview">
               <img src={attachment.dataUrl} alt="Attachment preview" />
               <span>{attachment.name}</span>
-              <button type="button" className="ir-file-remove" onClick={() => { setAttachment(null); if (fileInputRef.current) fileInputRef.current.value = '' }} aria-label="Remove attachment">✕</button>
+              <button type="button" className="ir-file-remove" onClick={() => { setAttachment(null); if (fileInputRef.current) fileInputRef.current.value = '' }} aria-label="Remove attachment">
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
             </div>
           )}
         </div>
@@ -262,7 +292,12 @@ function ReportForm({ user, onSuccess, onCancel }) {
 
       <div className="ir-form-actions">
         <button type="submit" className="primary-button" disabled={submitting} id="ir-submit-btn">
-          {submitting ? 'Submitting…' : 'Submit Report →'}
+          {submitting ? 'Submitting…' : (
+            <>
+              Submit Report
+              <FontAwesomeIcon icon={faArrowRight} style={{ marginLeft: 6 }} />
+            </>
+          )}
         </button>
         <button type="button" className="secondary-button" onClick={handleReset}>
           Reset
@@ -280,7 +315,10 @@ function ReportList({ reports, onSelect, onNewReport }) {
   return (
     <div>
       <div className="ir-topbar">
-        <h2>📁 My Reports</h2>
+        <h2>
+          <FontAwesomeIcon icon={faFolderOpen} style={{ marginRight: 8, color: 'var(--accent)' }} />
+          My Reports
+        </h2>
         <button className="primary-button" onClick={onNewReport} id="ir-new-report-btn">
           + New Report
         </button>
@@ -306,7 +344,9 @@ function ReportList({ reports, onSelect, onNewReport }) {
 
       {visible.length === 0 ? (
         <div className="ir-empty">
-          <span className="ir-empty-icon">📭</span>
+          <span className="ir-empty-icon">
+            <FontAwesomeIcon icon={faInbox} />
+          </span>
           <h3>{filter === 'All' ? 'No reports yet' : `No ${filter.toLowerCase()} reports`}</h3>
           <p>{filter === 'All' ? 'Submit a report to flag a mess issue. It will appear here.' : `You have no ${filter.toLowerCase()} reports at the moment.`}</p>
         </div>
@@ -330,12 +370,16 @@ function ReportList({ reports, onSelect, onNewReport }) {
               <div className="ir-card-meta">
                 <span className="ir-category-badge">{r.category}</span>
                 <span className={`ir-severity-badge ir-sev-${r.severity}`}>{r.severity}</span>
-                <span className="ir-card-date">📅 {formatDate(r.incidentDate)}</span>
+                <span className="ir-card-date">
+                  <FontAwesomeIcon icon={faCalendarDays} style={{ marginRight: 4 }} />
+                  {formatDate(r.incidentDate)}
+                </span>
                 <span className="ir-card-id">{r.id}</span>
               </div>
               {r.adminResponse && (
                 <p style={{ fontSize: 12, color: 'var(--notice-text)', margin: 0 }}>
-                  💬 Admin replied: {r.adminResponse.slice(0, 80)}{r.adminResponse.length > 80 ? '…' : ''}
+                  <FontAwesomeIcon icon={faCommentDots} style={{ marginRight: 5 }} />
+                  Admin replied: {r.adminResponse.slice(0, 80)}{r.adminResponse.length > 80 ? '…' : ''}
                 </p>
               )}
             </article>
@@ -382,7 +426,10 @@ function ReportDetail({ report, onBack }) {
         <p>{report.description}</p>
         {report.attachmentDataUrl && (
           <div className="ir-detail-attachment">
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>📎 Attached photo:</p>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+              <FontAwesomeIcon icon={faPaperclip} style={{ marginRight: 6 }} />
+              Attached photo:
+            </p>
             <img
               src={report.attachmentDataUrl}
               alt="Attached photo"
@@ -396,7 +443,10 @@ function ReportDetail({ report, onBack }) {
       {/* Admin response */}
       {report.adminResponse && (
         <div className="ir-admin-response">
-          <h4>💬 Admin Response</h4>
+          <h4>
+            <FontAwesomeIcon icon={faCommentDots} style={{ marginRight: 6 }} />
+            Admin Response
+          </h4>
           <p>{report.adminResponse}</p>
         </div>
       )}
@@ -472,7 +522,9 @@ export default function IssueReportView({ user }) {
     <div>
       {successReport && (
         <div className="ir-success">
-          <span className="ir-success-icon">✅</span>
+          <span className="ir-success-icon">
+            <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#138052' }} />
+          </span>
           <div>
             <h3>Report submitted successfully!</h3>
             <p>Reference ID: <code>{successReport.id}</code>. The mess admin will review your report shortly.</p>

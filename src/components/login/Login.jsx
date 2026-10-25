@@ -1,4 +1,10 @@
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faArrowRight,
+  faCircleCheck,
+  faRightToBracket
+} from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
 import './Login.css'
 
@@ -39,7 +45,7 @@ export default function Login({ onNavigate, onLogin, signupSuccess }) {
 
       // Toast on successful login
       addToast({
-        message: `Welcome back, ${sessionUser.fullName?.split(' ')[0] || 'there'}! 👋`,
+        message: `Welcome back, ${sessionUser.fullName?.split(' ')[0] || 'there'}!`,
         type: 'success',
       })
 
@@ -57,7 +63,8 @@ export default function Login({ onNavigate, onLogin, signupSuccess }) {
 
         {signupSuccess && (
           <p className="login-success" role="status">
-            ✓ Account created successfully! Please log in below.
+            <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 6 }} />
+            Account created successfully! Please log in below.
           </p>
         )}
 
@@ -103,7 +110,13 @@ export default function Login({ onNavigate, onLogin, signupSuccess }) {
             id="login-submit-btn"
             disabled={loading}
           >
-            {loading ? 'Logging in...' : 'Log in ->'}
+            {loading ? 'Logging in...' : (
+              <>
+                <FontAwesomeIcon icon={faRightToBracket} style={{ marginRight: 6 }} />
+                Log in
+                <FontAwesomeIcon icon={faArrowRight} style={{ marginLeft: 6 }} />
+              </>
+            )}
           </button>
         </form>
 

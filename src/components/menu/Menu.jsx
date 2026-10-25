@@ -1,4 +1,10 @@
 import { useEffect, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faCalendarDays,
+  faChartPie,
+  faCircleInfo
+} from '@fortawesome/free-solid-svg-icons'
 import { getWeeklyMenu } from '../../utils/menuStorage'
 import './Menu.css'
 
@@ -27,7 +33,8 @@ export default function Menu({ onNavigate }) {
             aria-selected="true"
             id="tab-weekly-menu"
           >
-            <span>📅</span> Weekly Mess Menu
+            <FontAwesomeIcon icon={faCalendarDays} style={{ marginRight: 8 }} />
+            Weekly Mess Menu
           </button>
           <button
             className="menu-nav-pill"
@@ -35,7 +42,8 @@ export default function Menu({ onNavigate }) {
             type="button"
             id="tab-nutrition-guide"
           >
-            <span>🥗</span> Nutrition & Allergens
+            <FontAwesomeIcon icon={faChartPie} style={{ marginRight: 8 }} />
+            Nutrition & Allergens
           </button>
         </div>
       )}
@@ -70,7 +78,8 @@ export default function Menu({ onNavigate }) {
       </div>
 
       <p className="menu-note">
-        ℹ️ Menu items may change when ingredients are unavailable or due to hostel instructions.
+        <FontAwesomeIcon icon={faCircleInfo} style={{ marginRight: 6 }} />
+        Menu items may change when ingredients are unavailable or due to hostel instructions.
       </p>
     </section>
   )

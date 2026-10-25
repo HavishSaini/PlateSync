@@ -1,4 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faCalendarDays,
+  faChartPie,
+  faTriangleExclamation,
+  faMagnifyingGlass,
+  faDumbbell,
+  faWheatAwn,
+  faDroplet,
+  faXmark,
+  faCircleCheck,
+  faCircleExclamation,
+  faQuestion,
+  faCircleInfo,
+  faChevronDown,
+  faChevronUp,
+  faArrowLeft,
+  faBolt
+} from '@fortawesome/free-solid-svg-icons'
 import {
   getAllMenuDishes,
 } from '../../utils/menuStorage'
@@ -125,7 +144,8 @@ export default function NutritionView({ onNavigate }) {
           type="button"
           id="tab-weekly-menu"
         >
-          <span>📅</span> Weekly Mess Menu
+          <FontAwesomeIcon icon={faCalendarDays} style={{ marginRight: 8 }} />
+          Weekly Mess Menu
         </button>
         <button
           className="nutrition-nav-pill active"
@@ -133,7 +153,8 @@ export default function NutritionView({ onNavigate }) {
           aria-selected="true"
           id="tab-nutrition-guide"
         >
-          <span>🥗</span> Nutrition & Allergens
+          <FontAwesomeIcon icon={faChartPie} style={{ marginRight: 8 }} />
+          Nutrition & Allergens
         </button>
       </div>
 
@@ -148,7 +169,9 @@ export default function NutritionView({ onNavigate }) {
 
       {/* Safety Advisory Banner */}
       <aside className="allergen-advisory-banner" role="alert" aria-label="Important Dietary and Allergen Notice">
-        <div className="advisory-icon-wrap" aria-hidden="true">⚠️</div>
+        <div className="advisory-icon-wrap" aria-hidden="true">
+          <FontAwesomeIcon icon={faTriangleExclamation} />
+        </div>
         <div className="advisory-content">
           <h3>Mess Kitchen Dietary & Cross-Contact Advisory</h3>
           <p>
@@ -157,16 +180,16 @@ export default function NutritionView({ onNavigate }) {
           </p>
           <ul className="advisory-bullets">
             <li>
-              <strong>🔴 Confirmed Allergens:</strong> Explicitly present ingredients identified by mess staff.
+              <strong>Confirmed Allergens:</strong> Explicitly present ingredients identified by mess staff.
             </li>
             <li>
-              <strong>🟡 Cross-Contact Risk:</strong> Dishes prepared on shared surfaces where trace amounts of gluten, dairy, or nuts may transfer.
+              <strong>Cross-Contact Risk:</strong> Dishes prepared on shared surfaces where trace amounts of gluten, dairy, or nuts may transfer.
             </li>
             <li>
-              <strong>⚪ Unverified Status:</strong> Dishes without official laboratory confirmation are labeled unverified estimates. <em>Never assume an unverified dish is allergen-free.</em>
+              <strong>Unverified Status:</strong> Dishes without official laboratory confirmation are labeled unverified estimates. <em>Never assume an unverified dish is allergen-free.</em>
             </li>
             <li>
-              <strong>👨‍🍳 Staff Confirmation:</strong> If you have food allergies or severe dietary sensitivities, please consult the on-duty Mess Supervisor or Head Chef before consuming.
+              <strong>Staff Confirmation:</strong> If you have food allergies or severe dietary sensitivities, please consult the on-duty Mess Supervisor or Head Chef before consuming.
             </li>
           </ul>
         </div>
@@ -207,7 +230,9 @@ export default function NutritionView({ onNavigate }) {
       <div className="nutrition-toolbar">
         {/* Search Input */}
         <div className="nutrition-search-wrap">
-          <span className="search-icon" aria-hidden="true">🔍</span>
+          <span className="search-icon" aria-hidden="true">
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+          </span>
           <input
             type="search"
             className="nutrition-search-input"
@@ -223,7 +248,7 @@ export default function NutritionView({ onNavigate }) {
               onClick={() => setSearchQuery('')}
               aria-label="Clear search"
             >
-              ×
+              <FontAwesomeIcon icon={faXmark} />
             </button>
           )}
         </div>
@@ -237,10 +262,12 @@ export default function NutritionView({ onNavigate }) {
             aria-pressed={highProteinOnly}
             id="high-protein-meals-btn"
           >
-            <span className="nutrient-btn-icon" aria-hidden="true">💪</span>
+            <span className="nutrient-btn-icon" aria-hidden="true">
+              <FontAwesomeIcon icon={faDumbbell} />
+            </span>
             <span className="nutrient-btn-label">High Protein (≥ 10g)</span>
             <span className="nutrient-btn-count">{highProteinCount}</span>
-            {highProteinOnly && <span className="nutrient-active-tag">Active ✓</span>}
+            {highProteinOnly && <span className="nutrient-active-tag">Active</span>}
           </button>
 
           <button
@@ -250,10 +277,12 @@ export default function NutritionView({ onNavigate }) {
             aria-pressed={highFiberOnly}
             id="high-fiber-meals-btn"
           >
-            <span className="nutrient-btn-icon" aria-hidden="true">🌾</span>
+            <span className="nutrient-btn-icon" aria-hidden="true">
+              <FontAwesomeIcon icon={faWheatAwn} />
+            </span>
             <span className="nutrient-btn-label">High Fiber (≥ 5g)</span>
             <span className="nutrient-btn-count">{highFiberCount}</span>
-            {highFiberOnly && <span className="nutrient-active-tag">Active ✓</span>}
+            {highFiberOnly && <span className="nutrient-active-tag">Active</span>}
           </button>
 
           <button
@@ -263,10 +292,12 @@ export default function NutritionView({ onNavigate }) {
             aria-pressed={lowFatOnly}
             id="low-fat-meals-btn"
           >
-            <span className="nutrient-btn-icon" aria-hidden="true">🥑</span>
+            <span className="nutrient-btn-icon" aria-hidden="true">
+              <FontAwesomeIcon icon={faDroplet} />
+            </span>
             <span className="nutrient-btn-label">Low Fat (≤ 5g)</span>
             <span className="nutrient-btn-count">{lowFatCount}</span>
-            {lowFatOnly && <span className="nutrient-active-tag">Active ✓</span>}
+            {lowFatOnly && <span className="nutrient-active-tag">Active</span>}
           </button>
         </div>
 
@@ -326,7 +357,8 @@ export default function NutritionView({ onNavigate }) {
               onClick={handleResetFilters}
               type="button"
             >
-              Reset filters ✕
+              Reset filters
+              <FontAwesomeIcon icon={faXmark} style={{ marginLeft: 6 }} />
             </button>
           )}
         </div>
@@ -336,9 +368,9 @@ export default function NutritionView({ onNavigate }) {
       <div className="nutrition-results-header">
         <p className="results-count">
           Showing <strong>{filteredDishes.length}</strong> of {totalCount} dishes
-          {highProteinOnly && <span> · <strong>💪 High Protein (≥ 10g)</strong></span>}
-          {highFiberOnly && <span> · <strong>🌾 High Fiber (≥ 5g)</strong></span>}
-          {lowFatOnly && <span> · <strong>🥑 Low Fat (≤ 5g)</strong></span>}
+          {highProteinOnly && <span> · <strong>High Protein (≥ 10g)</strong></span>}
+          {highFiberOnly && <span> · <strong>High Fiber (≥ 5g)</strong></span>}
+          {lowFatOnly && <span> · <strong>Low Fat (≤ 5g)</strong></span>}
           {selectedMeal !== 'All' && <span> in <em>{selectedMeal}</em></span>}
           {selectedAllergenFilter !== 'All' && <span> (excluding <em>{selectedAllergenFilter}</em>)</span>}
           {onlyVerified && <span> (<em>Verified only</em>)</span>}
@@ -348,7 +380,9 @@ export default function NutritionView({ onNavigate }) {
       {/* Dishes Cards Grid */}
       {filteredDishes.length === 0 ? (
         <div className="nutrition-empty-state">
-          <div className="empty-icon">🥗</div>
+          <div className="empty-icon">
+            <FontAwesomeIcon icon={faChartPie} />
+          </div>
           <h3>No dishes match your filter criteria</h3>
           <p>
             No menu items match your current search query or allergen exclusion filter.
@@ -359,24 +393,26 @@ export default function NutritionView({ onNavigate }) {
           </button>
         </div>
       ) : (
-        <div className="dishes-grid">
-          {filteredDishes.map((dish) => {
+        <div className="nutrition-dishes-grid" role="feed" aria-label="Menu Dishes Nutrition Information">
+          {filteredDishes.map(dish => {
             const hasNutrition = dish.calories !== null && dish.calories !== undefined
-            const isExpanded = expandedDish === dish.norm
             const confirmed = Array.isArray(dish.confirmedAllergens) ? dish.confirmedAllergens : []
             const cross = Array.isArray(dish.crossContact) ? dish.crossContact : []
-            const hasIngredients = Boolean(dish.ingredients && dish.ingredients.trim())
+            const hasIngredients = typeof dish.ingredients === 'string' && dish.ingredients.trim().length > 0
+            const isExpanded = expandedDish === dish.norm
 
-            // Macronutrient percentage for visual representation
-            const totalMacros = (dish.protein || 0) + (dish.carbs || 0) + (dish.fat || 0)
-            const pPct = totalMacros > 0 ? Math.round(((dish.protein || 0) / totalMacros) * 100) : 0
-            const cPct = totalMacros > 0 ? Math.round(((dish.carbs || 0) / totalMacros) * 100) : 0
+            const p = dish.protein || 0
+            const c = dish.carbs || 0
+            const f = dish.fat || 0
+            const totalMacros = p + c + f
+            const pPct = totalMacros > 0 ? Math.round((p / totalMacros) * 100) : 0
+            const cPct = totalMacros > 0 ? Math.round((c / totalMacros) * 100) : 0
             const fPct = totalMacros > 0 ? Math.max(0, 100 - pPct - cPct) : 0
 
             return (
               <article
-                key={dish.norm || dish.name}
-                className={`dish-card ${dish.verified ? 'dish-verified' : ''}`}
+                className={`dish-nutrition-card ${dish.verified ? 'is-verified' : ''}`}
+                key={dish.norm}
                 id={`dish-card-${dish.norm}`}
               >
                 {/* Card Top: Name, Meal Category, Status */}
@@ -393,15 +429,18 @@ export default function NutritionView({ onNavigate }) {
                   <div className="dish-verification-badge-wrap">
                     {dish.verified ? (
                       <span className="v-badge verified" title="Kitchen and dietitian verified">
-                        ✓ Kitchen Verified
+                        <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 5 }} />
+                        Kitchen Verified
                       </span>
                     ) : hasNutrition ? (
                       <span className="v-badge unverified" title="Illustrative estimate only — unverified">
-                        ⚠️ Illustrative Estimate
+                        <FontAwesomeIcon icon={faCircleExclamation} style={{ marginRight: 5 }} />
+                        Illustrative Estimate
                       </span>
                     ) : (
                       <span className="v-badge pending" title="Nutrition information not available">
-                        ❓ Data Pending
+                        <FontAwesomeIcon icon={faQuestion} style={{ marginRight: 5 }} />
+                        Data Pending
                       </span>
                     )}
                   </div>
@@ -453,7 +492,9 @@ export default function NutritionView({ onNavigate }) {
                     </>
                   ) : (
                     <div className="nutrition-unavailable-box">
-                      <span className="unavailable-icon" aria-hidden="true">ℹ️</span>
+                      <span className="unavailable-icon" aria-hidden="true">
+                        <FontAwesomeIcon icon={faCircleInfo} />
+                      </span>
                       <div>
                         <strong>Nutrition information not available</strong>
                         <p>Macronutrient values and calorie counts have not yet been submitted or verified for this dish.</p>
@@ -466,7 +507,9 @@ export default function NutritionView({ onNavigate }) {
                 <div className="dish-allergen-section">
                   {confirmed.length > 0 ? (
                     <div className="allergen-alert-confirmed">
-                      <span className="allergen-heading-icon">⚠️</span>
+                      <span className="allergen-heading-icon">
+                        <FontAwesomeIcon icon={faTriangleExclamation} />
+                      </span>
                       <div className="allergen-alert-body">
                         <strong>Confirmed Allergens:</strong>
                         <div className="allergen-chips">
@@ -480,12 +523,17 @@ export default function NutritionView({ onNavigate }) {
                     </div>
                   ) : dish.verified ? (
                     <div className="allergen-alert-none">
-                      <span>✓ No common allergens reported by kitchen</span>
+                      <span>
+                        <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 6, color: '#138052' }} />
+                        No common allergens reported by kitchen
+                      </span>
                       <small>(Cross-contact risk may still exist in communal kitchens)</small>
                     </div>
                   ) : (
                     <div className="allergen-alert-unknown">
-                      <span className="allergen-heading-icon">⚠️</span>
+                      <span className="allergen-heading-icon">
+                        <FontAwesomeIcon icon={faTriangleExclamation} />
+                      </span>
                       <div className="allergen-alert-body">
                         <strong>Unknown Allergen Status:</strong>
                         <p>
@@ -499,7 +547,9 @@ export default function NutritionView({ onNavigate }) {
                   {/* Possible Cross-Contact Warnings */}
                   {cross.length > 0 && (
                     <div className="allergen-cross-contact-box">
-                      <span className="cross-icon" aria-hidden="true">⚡</span>
+                      <span className="cross-icon" aria-hidden="true">
+                        <FontAwesomeIcon icon={faBolt} />
+                      </span>
                       <div>
                         <strong>Cross-Contact Advisory:</strong>
                         <ul>
@@ -521,7 +571,9 @@ export default function NutritionView({ onNavigate }) {
                     aria-expanded={isExpanded}
                   >
                     <span>Ingredients & Preparation Notes</span>
-                    <span className="toggle-caret">{isExpanded ? '▲' : '▼'}</span>
+                    <span className="toggle-caret">
+                      <FontAwesomeIcon icon={isExpanded ? faChevronUp : faChevronDown} />
+                    </span>
                   </button>
 
                   {isExpanded && (
@@ -555,7 +607,8 @@ export default function NutritionView({ onNavigate }) {
           onClick={() => onNavigate && onNavigate('menu')}
           type="button"
         >
-          ← Return to Weekly Mess Menu
+          <FontAwesomeIcon icon={faArrowLeft} style={{ marginRight: 6 }} />
+          Return to Weekly Mess Menu
         </button>
       </div>
     </section>
