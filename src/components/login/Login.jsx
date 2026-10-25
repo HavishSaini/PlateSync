@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useToast } from '../../context/ToastContext'
 import './Login.css'
 
 export default function Login({ onNavigate, onLogin, signupSuccess }) {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { addToast } = useToast()
 
   const update = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -34,6 +36,13 @@ export default function Login({ onNavigate, onLogin, signupSuccess }) {
       const { password: _pw, ...sessionUser } = match
       localStorage.setItem('plateSyncUser', JSON.stringify(sessionUser))
       setLoading(false)
+
+      // Toast on successful login
+      addToast({
+        message: `Welcome back, ${sessionUser.fullName?.split(' ')[0] || 'there'}! 👋`,
+        type: 'success',
+      })
+
       if (onLogin) onLogin(sessionUser)
     }, 600)
   }
@@ -101,7 +110,7 @@ export default function Login({ onNavigate, onLogin, signupSuccess }) {
         <div className="login-divider"><span>or</span></div>
 
         <p className="login-footer">
-          Don't have an account?
+          Don&apos;t have an account?
           <button
             className="login-link-btn"
             id="go-to-signup"

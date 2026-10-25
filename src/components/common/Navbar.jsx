@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNotifications } from '../../context/NotificationContext'
 import './Navbar.css'
 
 export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkMode, toggleDark }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
+  const { unreadCount } = useNotifications()
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -42,6 +44,23 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
               {user.fullName?.split(' ')[0]}
               <span className="nav-user-role">{user.role}</span>
             </span>
+
+            {/* Notification Bell */}
+            <button
+              className={`nav-bell-btn${page === 'notifications' ? ' nav-bell-active' : ''}`}
+              onClick={() => onNavigate('notifications')}
+              aria-label={`Notifications${unreadCount > 0 ? ` — ${unreadCount} unread` : ''}`}
+              title="Notification Center"
+              id="nav-bell"
+            >
+              <span className="nav-bell-icon" aria-hidden="true">🔔</span>
+              {unreadCount > 0 && (
+                <span className="nav-bell-badge" aria-hidden="true">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </button>
+
             <button
               className="nav-logout-btn"
               id="nav-logout"

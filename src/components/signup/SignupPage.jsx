@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useToast } from '../../context/ToastContext'
 import './SignupPage.css'
 
 const hostels = ['Alfred Noble-A', 'Alfred Noble-B', 'Archimedes-A', 'Archimedes-B', 'Franklin-A', 'Franklin-B', 'Magellan']
@@ -11,6 +12,7 @@ export default function SignupPage({ onNavigate }) {
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { addToast } = useToast()
 
   const update = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -62,6 +64,13 @@ export default function SignupPage({ onNavigate }) {
 
       localStorage.setItem('plateSyncUsers', JSON.stringify([...existing, newUser]))
       setLoading(false)
+
+      // Toast on successful signup
+      addToast({
+        message: `Account created! Welcome to PlateSync, ${form.fullName?.split(' ')[0] || 'there'}! 🎉`,
+        type: 'success',
+        duration: 5000,
+      })
 
       // Navigate to Login and pass a flag so it can display a success banner
       if (onNavigate) onNavigate('login', { signupSuccess: true })

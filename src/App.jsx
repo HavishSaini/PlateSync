@@ -7,6 +7,10 @@ import SignupPage from './components/signup/SignupPage'
 import Login from './components/login/Login'
 import Dashboard from './components/dashboard/Dashboard'
 import Menu from './components/menu/Menu'
+import NotificationCenter from './components/notifications/NotificationCenter'
+import ToastContainer from './components/notifications/ToastContainer'
+import { NotificationProvider } from './context/NotificationContext'
+import { ToastProvider } from './context/ToastContext'
 
 // ---------------------------------------------------------------------------
 // Read ?view= param so that the Navbar "Login / Sign Up" links can still open
@@ -79,30 +83,37 @@ export default function App() {
   const toggleDark = () => setDarkMode(prev => !prev)
 
   return (
-    <div className="app-shell">
-      <Navbar
-        page={effectivePage}
-        user={user}
-        onNavigate={navigate}
-        onHome={goHome}
-        onLogout={handleLogout}
-        darkMode={darkMode}
-        toggleDark={toggleDark}
-      />
-      <main>
-        {effectivePage === 'home'        && <Home onGetStarted={() => navigate(user ? 'dashboard' : 'signup-page')} />}
-        {effectivePage === 'signup-page' && <SignupPage onNavigate={navigate} />}
-        {effectivePage === 'login'       && (
-          <Login
+    <ToastProvider>
+      <NotificationProvider user={user}>
+        <div className="app-shell">
+          <Navbar
+            page={effectivePage}
+            user={user}
             onNavigate={navigate}
-            onLogin={handleLogin}
-            signupSuccess={pageExtra?.signupSuccess}
+            onHome={goHome}
+            onLogout={handleLogout}
+            darkMode={darkMode}
+            toggleDark={toggleDark}
           />
-        )}
-        {effectivePage === 'dashboard'   && <Dashboard user={user} onHome={goHome} onLogout={handleLogout} />}
-        {effectivePage === 'menu'        && <Menu onGetStarted={() => navigate(user ? 'dashboard' : 'signup-page')} />}
-      </main>
-      <Footer />
-    </div>
+          <main>
+            {effectivePage === 'home'          && <Home onGetStarted={() => navigate(user ? 'dashboard' : 'signup-page')} />}
+            {effectivePage === 'signup-page'   && <SignupPage onNavigate={navigate} />}
+            {effectivePage === 'login'         && (
+              <Login
+                onNavigate={navigate}
+                onLogin={handleLogin}
+                signupSuccess={pageExtra?.signupSuccess}
+              />
+            )}
+            {effectivePage === 'dashboard'     && <Dashboard user={user} onHome={goHome} onLogout={handleLogout} />}
+            {effectivePage === 'menu'          && <Menu onGetStarted={() => navigate(user ? 'dashboard' : 'signup-page')} />}
+            {effectivePage === 'notifications' && <NotificationCenter onNavigate={navigate} />}
+          </main>
+          <Footer />
+          {/* Global toast container — renders on top of everything */}
+          <ToastContainer />
+        </div>
+      </NotificationProvider>
+    </ToastProvider>
   )
 }
