@@ -96,7 +96,7 @@ export default function App() {
             toggleDark={toggleDark}
           />
           <main>
-            {effectivePage === 'home'          && <Home onGetStarted={() => navigate(user ? 'dashboard' : 'signup-page')} />}
+            {effectivePage === 'home'          && <Home onGetStarted={() => navigate(user ? 'dashboard' : 'login')} />}
             {effectivePage === 'signup-page'   && <SignupPage onNavigate={navigate} />}
             {effectivePage === 'login'         && (
               <Login
@@ -106,7 +106,7 @@ export default function App() {
               />
             )}
             {effectivePage === 'dashboard'     && <Dashboard user={user} onHome={goHome} onLogout={handleLogout} />}
-            {effectivePage === 'menu'          && <Menu onGetStarted={() => navigate(user ? 'dashboard' : 'signup-page')} />}
+            {effectivePage === 'menu'          && <Menu />}
             {effectivePage === 'notifications' && <NotificationCenter onNavigate={navigate} />}
           </main>
           <Footer />

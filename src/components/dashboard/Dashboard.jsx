@@ -2,18 +2,23 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import MealCard from '../shared/MealCard'
 import { useNotifications } from '../../context/NotificationContext'
 import { syncAdminReportNotifications } from '../../utils/reportsStorage'
+import {
+  DEFAULT_MEALS,
+  getMealsForToday,
+  getNextEligibleMeal,
+  getMealTimes,
+  saveMealMenu,
+} from '../../utils/menuStorage'
+import {
+  getAllLiveDemand,
+  DEFAULT_BOOKINGS,
+} from '../../utils/attendanceStorage'
 import IssueReportView from '../issues/IssueReportView'
 import AdminIssueView from '../issues/AdminIssueView'
 import './Dashboard.css'
 
-const meals = [
-  { id:'breakfast', name:'Breakfast', icon:'☀', startTime:'08:00', time:'8:00 AM – 9:30 AM', waste:'60 kg', menu:'Mix Parantha · Curd · Chutney · Tea' },
-  { id:'lunch', name:'Lunch', icon:'◐', startTime:'12:30', time:'12:30 PM – 2:30 PM', waste:'60 kg', menu:'Saboot Mix Dal · Tawa Soya Chaap · Rice · Roti · Raita' },
-  { id:'snacks', name:'Snacks', icon:'☕', startTime:'16:30', time:'4:30 PM – 5:30 PM', waste:'14 kg', menu:'Vegetable Pasta · Cold Coffee' },
-  { id:'dinner', name:'Dinner', icon:'◑', startTime:'19:30', time:'7:30 PM – 9:30 PM', waste:'60 kg', menu:'Hari Dal · Chilli Potato · Rice · Roti · Chutney · Laddoo' },
-]
 const studentTabs = ['Today\u2019s meals', 'My attendance', 'My impact', 'Report issue']
-const adminTabs   = ['Live demand', 'Mark attendance', 'Waste analysis', 'Issue reports']
+const adminTabs   = ['Live demand', 'Mark attendance', 'Menu management', 'Waste analysis', 'Issue reports']
 
 // A booking is possible only during the 45 minutes before a meal starts.
 function getBookingInfo(meal, now) {
@@ -39,8 +44,30 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
   const [activeTab, setActiveTab] = useState(user?.role === 'admin' ? 'Live demand' : 'Today\u2019s meals')
   const [message, setMessage] = useState('')
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [todayMeals, setTodayMeals] = useState(() => getMealsForToday(new Date()))
+
   useEffect(() => localStorage.setItem('plateSyncBookings', JSON.stringify(bookings)), [bookings])
-  useEffect(() => { const clock = setInterval(() => setCurrentTime(new Date()), 30000); return () => clearInterval(clock) }, [])
+  useEffect(() => {
+    const clock = setInterval(() => {
+      const now = new Date()
+      setCurrentTime(now)
+      setTodayMeals(getMealsForToday(now))
+    }, 30000)
+    return () => clearInterval(clock)
+  }, [])
+
+  // Listen for live menu updates dispatched by the Admin
+  useEffect(() => {
+    const handleMenuUpdate = () => {
+      setTodayMeals(getMealsForToday(new Date()))
+    }
+    window.addEventListener('plateSyncMenuUpdate', handleMenuUpdate)
+    window.addEventListener('storage', handleMenuUpdate)
+    return () => {
+      window.removeEventListener('plateSyncMenuUpdate', handleMenuUpdate)
+      window.removeEventListener('storage', handleMenuUpdate)
+    }
+  }, [])
 
   // Notifications
   const { addNotification } = useNotifications()
@@ -88,7 +115,7 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
   if (!user) return <section className="page-container"><h1 className="page-title">Please create an account first.</h1><button className="primary-button" onClick={onHome}>Go home</button></section>
 
   const changeBooking = (id) => {
-    const meal = meals.find(item => item.id === id)
+    const meal = todayMeals.find(item => item.id === id)
     if (!getBookingInfo(meal, new Date()).open) {
       setMessage('This booking window is closed. You can only book in the 45 minutes before serving starts.')
       return
@@ -140,29 +167,29 @@ export default function Dashboard({ user, onHome, onLogout: _onLogout }) {
         ))}
       </div>
       {user.role === 'admin'
-        ? <AdminView activeTab={activeTab} user={user} />
-        : <StudentView activeTab={activeTab} bookings={bookings} message={message} onBook={changeBooking} currentTime={currentTime} user={user} />
+        ? <AdminView activeTab={activeTab} user={user} currentTime={currentTime} />
+        : <StudentView activeTab={activeTab} bookings={bookings} message={message} onBook={changeBooking} currentTime={currentTime} user={user} meals={todayMeals} />
       }
     </section>
   )
 }
 
-function StudentView({ activeTab, bookings, message, onBook, currentTime, user }) {
+function StudentView({ activeTab, bookings, message, onBook, currentTime, user, meals }) {
   const savedFood = useMemo(() => (bookings.length * 0.35).toFixed(2), [bookings])
-  if (activeTab === 'My attendance') return <Attendance bookings={bookings} />
+  if (activeTab === 'My attendance') return <Attendance bookings={bookings} meals={meals} />
   if (activeTab === 'My impact') return <section className="impact-view"><p className="section-label">YOUR RESPONSIBILITY SCORE</p><h2>Every booking makes a difference.</h2><div className="impact-score"><strong>{Math.min(100, 80 + bookings.length * 5)}<small>/100</small></strong><p>Your score grows when you book thoughtfully and attend your confirmed meals.</p></div><div className="summary-grid"><Summary title="MEALS BOOKED" value={`${bookings.length} / 4`} detail="for today"/><Summary title="ESTIMATED FOOD SAVED" value={`${savedFood} kg`} detail="from your bookings"/><Summary title="DAILY HOSTEL TARGET" value="194 kg" detail="average waste to reduce"/></div></section>
   if (activeTab === 'Report issue') return <IssueReportView user={user} />
   return <><div className="summary-grid"><Summary title="MEALS BOOKED" value={`${bookings.length} / 4`} detail="for today"/><Summary title="ESTIMATED FOOD SAVED" value={`${savedFood} kg`} detail="based on your bookings"/><Summary title="BOOKING WINDOW" value="45 min" detail="only before the meal starts"/></div>{message && <p className="notice">{message}</p>}<div className="dashboard-head"><div><p className="section-label">TODAY'S MESS MENU</p><h2>Choose meals responsibly</h2></div><p>Real-time booking opens only during the 45 minutes before each meal.</p></div><div className="dashboard-meals">{meals.map(meal => <MealCard key={meal.id} meal={meal} booked={bookings.includes(meal.id)} onBook={onBook} bookingInfo={getBookingInfo(meal, currentTime)} />)}</div></>
 }
 
-function Attendance({ bookings }) {
+function Attendance({ bookings, meals = DEFAULT_MEALS }) {
   const [seconds, setSeconds] = useState(2700)
   useEffect(() => { const timer = setInterval(() => setSeconds(old => old > 0 ? old - 1 : 0), 1000); return () => clearInterval(timer) }, [])
   const minutes = String(Math.floor(seconds / 60)).padStart(2, '0'); const remainingSeconds = String(seconds % 60).padStart(2, '0')
   return <section className="attendance-view"><p className="section-label">ATTENDANCE CHECK-IN</p><h2>Your meal attendance</h2><p>Show your booking at the mess counter. The staff marks you as attended during the meal period.</p><div className="timer-card"><span>TIME LEFT FOR CURRENT MEAL PERIOD</span><strong>00:{minutes}:{remainingSeconds}</strong><small>Attendance can be marked from 12:30 PM to 2:30 PM for lunch.</small></div><div className="attendance-list">{meals.map(meal => <div key={meal.id}><span>{meal.name}</span><b className={bookings.includes(meal.id) ? 'confirmed' : 'pending'}>{bookings.includes(meal.id) ? 'Confirmed — show at counter' : 'Not booked'}</b></div>)}</div></section>
 }
 
-function AdminView({ activeTab, user }) {
+function AdminView({ activeTab, user, currentTime }) {
   const [attendance, setAttendance] = useState(0)
   const [rollNo, setRollNo] = useState('')
   const [notice, setNotice] = useState('')
@@ -183,11 +210,266 @@ function AdminView({ activeTab, user }) {
   }
 
   if (activeTab === 'Issue reports') return <AdminIssueView user={user} />
+  if (activeTab === 'Menu management') return <AdminMenuManagement currentTime={currentTime} />
   if (activeTab === 'Mark attendance') return <section className="admin-form"><p className="section-label">MESS STAFF ACTION</p><h2>Mark student attendance</h2><p>Enter the student roll number after serving their booked meal.</p><form onSubmit={markAttendance}><label>Student roll number<input value={rollNo} onChange={event => setRollNo(event.target.value)} placeholder="Enter roll number" /></label><button className="primary-button">Mark attended ✓</button></form>{notice && <p className="notice">{notice}</p>}<div className="attendance-total"><strong>{attendance}</strong><span>students marked attended in this session</span></div></section>
   if (activeTab === 'Waste analysis') return <WasteAnalysis />
   return <LiveDemand />
 }
 
-function LiveDemand() { return <><div className="summary-grid"><Summary title="EXPECTED STUDENTS" value="642" detail="from meal bookings"/><Summary title="PREDICTED ATTENDANCE" value="584" detail="91% historical attendance"/><Summary title="RECOMMENDED SERVINGS" value="590" detail="includes a small safety buffer"/></div><section className="demand-table"><div className="demand-head"><span>Meal</span><span>Booked</span><span>Expected</span><span>Prepare</span></div>{[['Breakfast','187','170','174'],['Lunch','238','217','222'],['Snacks','112','100','104'],['Dinner','194','177','182']].map(row => <div className="demand-row" key={row[0]}>{row.map(item => <span key={item}>{item}</span>)}</div>)}</section><section className="simple-logic"><div><p className="section-label">SMART PREPARATION</p><h2>Clear, explainable estimate</h2><p>Registered students × past attendance rate + a small safety buffer = recommended servings.</p></div><div className="formula"><span>238 booked</span><b>×</b><span>91% attendance</span><b>+</b><span>5 buffer</span><b>=</b><strong>222 lunch servings</strong></div></section></> }
+// ─── Admin Menu Management Component ─────────────────────────────────────────
+
+function NextMealEditor({ meal, isLocked }) {
+  const [menuText, setMenuText] = useState(meal.menu)
+  const [saving, setSaving] = useState(false)
+  const [feedback, setFeedback] = useState(null)
+  const { addNotification } = useNotifications()
+
+  const handleSave = (e) => {
+    e.preventDefault()
+    if (isLocked) {
+      setFeedback({ type: 'error', text: 'Menu locked because student booking has started.' })
+      return
+    }
+
+    setSaving(true)
+    setFeedback(null)
+
+    const res = saveMealMenu({ mealId: meal.id, menuText, now: new Date() })
+    setSaving(false)
+
+    if (res.success) {
+      setFeedback({ type: 'success', text: `Menu for ${meal.name} updated successfully!` })
+      addNotification({
+        title: 'Menu Update Published',
+        message: `Admin updated ${meal.name} menu: "${menuText.trim()}"`,
+        category: 'menu',
+        eventKey: `admin_menu_change_${meal.id}_${Date.now()}`,
+        actionLabel: 'View Menu',
+        actionPage: 'menu',
+      })
+    } else {
+      setFeedback({ type: 'error', text: res.error || 'Failed to save menu changes.' })
+    }
+  }
+
+  return (
+    <form onSubmit={handleSave} className="menu-mgmt-form">
+      <label htmlFor="next-meal-menu-input">
+        Menu items for {meal.name}
+      </label>
+      <textarea
+        id="next-meal-menu-input"
+        className="menu-mgmt-textarea"
+        value={menuText}
+        onChange={(e) => setMenuText(e.target.value)}
+        disabled={isLocked || saving}
+        placeholder="e.g. Saboot Mix Dal · Tawa Soya Chaap · Rice · Roti · Raita"
+        rows={3}
+        required
+      />
+
+      <div className="menu-mgmt-actions">
+        <button
+          type="submit"
+          className="primary-button"
+          disabled={isLocked || saving || !menuText.trim() || menuText.trim() === meal.menu}
+          id="admin-save-menu-btn"
+        >
+          {saving ? 'Saving…' : 'Save Menu Changes ✓'}
+        </button>
+        {feedback && (
+          <span className={feedback.type === 'success' ? 'menu-mgmt-success' : 'menu-mgmt-error'}>
+            {feedback.text}
+          </span>
+        )}
+      </div>
+    </form>
+  )
+}
+
+function AdminMenuManagement({ currentTime }) {
+  const nextInfo = getNextEligibleMeal(currentTime)
+  const { meal, dateStr, isTomorrow, bookingStart, isLocked, lockReason } = nextInfo
+  const minutesToBooking = Math.max(0, Math.ceil((bookingStart - currentTime) / 60000))
+
+  return (
+    <section className="menu-mgmt-view">
+      <p className="section-label">MESS ADMIN · MENU SCHEDULING</p>
+      <h2 style={{ margin: 0, fontSize: 24, color: 'var(--text-primary)' }}>Next Meal Menu Management</h2>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '8px 0 20px', lineHeight: 1.5 }}>
+        Update the menu for the next eligible meal before student booking begins.
+        Once student booking opens (45 minutes prior to meal serving), editing is locked to preserve confirmed bookings.
+      </p>
+
+      {/* Primary Target Meal Card */}
+      <div className="menu-mgmt-card">
+        <div className="menu-mgmt-card-top">
+          <div className="menu-mgmt-card-title">
+            <span style={{ fontSize: 26 }} aria-hidden="true">{meal.icon}</span>
+            <div>
+              <h3>Next Eligible Meal: {meal.name}</h3>
+              <small>{isTomorrow ? 'Tomorrow' : 'Today'} ({dateStr}) · Serving: {meal.time}</small>
+            </div>
+          </div>
+          <div>
+            {isLocked ? (
+              <span className="menu-badge menu-badge-locked">🔒 Booking Open (Locked)</span>
+            ) : (
+              <span className="menu-badge menu-badge-editable">✏️ Booking Closed (Editable)</span>
+            )}
+          </div>
+        </div>
+
+        {isLocked ? (
+          <div className="menu-mgmt-notice locked" role="alert">
+            ⚠️ {lockReason || 'Menu locked because student booking has started.'} Modifications to this meal are no longer accepted.
+          </div>
+        ) : (
+          <div className="menu-mgmt-notice editable">
+            ℹ️ Student booking opens in <strong>{minutesToBooking} minutes</strong> (at {formatTime(bookingStart)}). You can adjust and save menu items now.
+          </div>
+        )}
+
+        <NextMealEditor
+          key={`${meal.id}_${dateStr}`}
+          meal={meal}
+          isLocked={isLocked}
+        />
+      </div>
+
+      {/* Daily Schedule Overview */}
+      <div>
+        <p className="section-label">DAILY SCHEDULE OVERVIEW</p>
+        <h3 style={{ margin: '0 0 6px', fontSize: 18, color: 'var(--text-primary)' }}>All Meals Status</h3>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 14px' }}>
+          PlateSync rules permit editing only the next upcoming meal. Subsequent meals remain locked until their turn.
+        </p>
+
+        <div className="schedule-table-wrap">
+          <div className="schedule-head">
+            <span>Meal</span>
+            <span>Serving Time</span>
+            <span>Booking Window</span>
+            <span>Status</span>
+          </div>
+          {DEFAULT_MEALS.map(m => {
+            const isTarget = m.id === meal.id
+            const { mealStart: mStart, bookingStart: mBookStart } = getMealTimes(m, currentTime)
+            const isPast = !isTarget && (currentTime >= mStart)
+
+            let badge
+            if (isTarget) {
+              badge = isLocked
+                ? <span className="menu-badge menu-badge-locked">Locked (Booking open)</span>
+                : <span className="menu-badge menu-badge-editable">Next Eligible (Editable)</span>
+            } else if (isPast) {
+              badge = <span className="menu-badge menu-badge-future">Completed / Past</span>
+            } else {
+              badge = <span className="menu-badge menu-badge-future">Upcoming (Locked until next)</span>
+            }
+
+            return (
+              <div key={m.id} className={`schedule-row${isTarget ? ' active' : ''}`}>
+                <strong>{m.icon} {m.name}</strong>
+                <span>{m.time}</span>
+                <span>Opens {formatTime(mBookStart)}</span>
+                <span>{badge}</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Live Demand Component with 10% Historical Actual Attendance Buffer ───────
+
+function LiveDemand() {
+  const demandList = useMemo(() => getAllLiveDemand(DEFAULT_BOOKINGS, 0.91), [])
+
+  const totalBookings = demandList.reduce((acc, row) => acc + row.bookings, 0)
+  const totalExpected = demandList.reduce((acc, row) => acc + row.expectedAttendance, 0)
+  const totalPrepare  = demandList.reduce((acc, row) => acc + row.recommendedServings, 0)
+
+  // Find Lunch calculation for formula display
+  const lunchData = demandList.find(r => r.mealId === 'lunch') || demandList[1]
+  const hasEstimate = demandList.some(r => r.isEstimate)
+
+  return (
+    <>
+      <div className="summary-grid">
+        <Summary title="TOTAL BOOKINGS" value={totalBookings} detail="across all 4 meals" />
+        <Summary title="EXPECTED ATTENDANCE" value={totalExpected} detail="based on 91% historical rate" />
+        <Summary title="RECOMMENDED SERVINGS" value={totalPrepare} detail="includes 10% historical safety buffer" />
+      </div>
+
+      <div className="dashboard-head">
+        <div>
+          <p className="section-label">LIVE PREPARATION ESTIMATES</p>
+          <h2>Recommended Servings per Meal</h2>
+        </div>
+        <p>10% safety buffer is dynamically calculated from average historical actual attendance.</p>
+      </div>
+
+      <div className="demand-table">
+        <div className="demand-head live-demand">
+          <span>Meal</span>
+          <span>Bookings</span>
+          <span>Att. Rate</span>
+          <span>Expected</span>
+          <span>Avg Past Actual</span>
+          <span>10% Buffer</span>
+          <span>Recommended</span>
+        </div>
+        {demandList.map(row => (
+          <div className="demand-row live-demand" key={row.mealId}>
+            <span>
+              <strong>{row.mealName}</strong>
+              {row.isEstimate && <span className="demand-estimate-tag">Estimate</span>}
+            </span>
+            <span>{row.bookings}</span>
+            <span>{row.attendanceRatePercent}</span>
+            <span>{row.expectedAttendance}</span>
+            <span>{row.avgHistoricalAttendance !== null ? row.avgHistoricalAttendance : '—'}</span>
+            <span>+{row.safetyBuffer}</span>
+            <span>{row.recommendedServings} servings</span>
+          </div>
+        ))}
+      </div>
+
+      {hasEstimate && (
+        <p className="notice" style={{ marginTop: 12 }}>
+          ℹ️ Meals marked with <strong>Estimate</strong> do not have recorded historical actual attendance, so they reflect expected attendance without an added buffer.
+        </p>
+      )}
+
+      {/* Dynamic formula demonstration */}
+      <section className="simple-logic">
+        <div>
+          <p className="section-label">DYNAMIC SAFETY BUFFER</p>
+          <h2>Transparent, data-backed estimate</h2>
+          <p>
+            The fixed buffer of 5 has been replaced by <strong>10% of average historical actual attendance</strong> for each meal:
+            <br />
+            <code>Recommended = CEIL(Bookings × 91%) + CEIL(Avg Past Actual × 10%)</code>
+          </p>
+        </div>
+        <div className="formula">
+          <span>{lunchData.bookings} booked</span>
+          <b>×</b>
+          <span>{lunchData.attendanceRatePercent} rate</span>
+          <b>=</b>
+          <span>{lunchData.expectedAttendance} expected</span>
+          <b>+</b>
+          <span>{lunchData.safetyBuffer} buffer (10% of {lunchData.avgHistoricalAttendance} actual)</span>
+          <b>=</b>
+          <strong>{lunchData.recommendedServings} lunch servings</strong>
+        </div>
+      </section>
+    </>
+  )
+}
+
 function WasteAnalysis() { const data=[['Breakfast','60 kg','42 kg','18 kg saved'],['Lunch','60 kg','39 kg','21 kg saved'],['Snacks','14 kg','9 kg','5 kg saved'],['Dinner','60 kg','41 kg','19 kg saved']]; return <section><p className="section-label">DAILY WASTE REVIEW</p><h2 className="analysis-title">Approximate food-waste analysis</h2><div className="demand-table"><div className="demand-head analysis"><span>Meal</span><span>Past waste</span><span>Estimated today</span><span>Potential saved</span></div>{data.map(row => <div className="demand-row analysis" key={row[0]}>{row.map(item => <span key={item}>{item}</span>)}</div>)}</div><p className="notice">Estimated daily saving with PlateSync: approximately 63 kg of food. These figures are project demo calculations based on your hostel's approximate data.</p></section> }
 function Summary({ title, value, detail }) { return <article><small>{title}</small><strong>{value}</strong><span>{detail}</span></article> }
