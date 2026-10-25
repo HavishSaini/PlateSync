@@ -187,6 +187,20 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                 <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
                 <span className={`toggle-pill${darkMode ? ' on' : ''}`} />
               </button>
+
+              <div className="dropdown-divider" />
+
+              <p className="dropdown-label">HELP & GUIDES</p>
+              <button
+                className={`ham-nav-item ${page === 'how-to-use' ? 'active' : ''}`}
+                onClick={() => { onNavigate('how-to-use'); setMenuOpen(false) }}
+                role="menuitem"
+                id="ham-how-to-use"
+              >
+                <span className="ham-nav-icon">📖</span>
+                <span className="ham-nav-text">How to Use</span>
+                <span className="ham-nav-badge">Guide</span>
+              </button>
             </div>
           )}
         </div>

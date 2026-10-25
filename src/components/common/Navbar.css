@@ -443,6 +443,61 @@
   transform: translateX(15px);
 }
 
+/* ─── Dropdown Divider & Guide Nav Items ───────────────────── */
+.dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 4px 8px;
+}
+
+.ham-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ham-nav-item:hover {
+  background: var(--ham-bg-hover);
+  color: var(--accent);
+}
+
+.ham-nav-item.active {
+  background: rgba(19, 122, 80, 0.1);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.ham-nav-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ham-nav-text {
+  flex: 1;
+}
+
+.ham-nav-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(19, 122, 80, 0.12);
+  color: var(--accent);
+}
+
 /* ─── Responsive ───────────────────────────────────────────── */
 @media (max-width: 520px) {
   .navbar { padding: 0 14px; }
