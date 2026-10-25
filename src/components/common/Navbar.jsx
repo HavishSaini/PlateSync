@@ -5,18 +5,28 @@ import './Navbar.css'
 export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkMode, toggleDark }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
+
+  const [menuSubOpen, setMenuSubOpen] = useState(false)
+  const [menuSubHover, setMenuSubHover] = useState(false)
+  const menuDropdownRef = useRef(null)
+
   const { unreadCount } = useNotifications()
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     function handleOutsideClick(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false)
       }
+      if (menuDropdownRef.current && !menuDropdownRef.current.contains(e.target)) {
+        setMenuSubOpen(false)
+      }
     }
-    if (menuOpen) document.addEventListener('mousedown', handleOutsideClick)
+    if (menuOpen || menuSubOpen) document.addEventListener('mousedown', handleOutsideClick)
     return () => document.removeEventListener('mousedown', handleOutsideClick)
-  }, [menuOpen])
+  }, [menuOpen, menuSubOpen])
+
+  const isMenuSubVisible = menuSubOpen || menuSubHover
 
   return (
     <header className="navbar">
@@ -26,7 +36,70 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
 
       <nav aria-label="Main navigation">
         <button onClick={onHome} className={page === 'home' ? 'active' : ''}>Home</button>
-        <button onClick={() => onNavigate('menu')} className={page === 'menu' ? 'active' : ''}>Menu</button>
+
+        {/* Menu item with Nutrition & Allergens submenu */}
+        <div
+          className="nav-menu-item-wrap"
+          ref={menuDropdownRef}
+          onMouseEnter={() => setMenuSubHover(true)}
+          onMouseLeave={() => setMenuSubHover(false)}
+        >
+          <div className="nav-menu-btn-group">
+            <button
+              onClick={() => { onNavigate('menu'); setMenuSubOpen(false) }}
+              className={`nav-menu-btn ${(page === 'menu' || page === 'nutrition') ? 'active' : ''}`}
+              id="nav-menu-main-btn"
+            >
+              Menu
+            </button>
+            <button
+              type="button"
+              className={`nav-menu-chevron-btn ${isMenuSubVisible ? 'open' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                setMenuSubOpen(prev => !prev)
+              }}
+              aria-expanded={isMenuSubVisible}
+              aria-haspopup="true"
+              aria-label="Toggle menu options"
+              id="nav-menu-chevron"
+            >
+              <svg width="8" height="5" viewBox="0 0 8 5" fill="none" aria-hidden="true">
+                <path d="M1 1L4 4L7 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+
+          {isMenuSubVisible && (
+            <div className="nav-menu-submenu" role="menu" aria-label="Menu options">
+              <button
+                role="menuitem"
+                className={`nav-submenu-item ${page === 'menu' ? 'active' : ''}`}
+                onClick={() => { onNavigate('menu'); setMenuSubOpen(false) }}
+                id="nav-sub-menu"
+              >
+                <span className="submenu-icon" aria-hidden="true">📅</span>
+                <div className="submenu-text">
+                  <span className="submenu-title">Weekly Mess Menu</span>
+                  <span className="submenu-desc">Schedule & day-by-day meals</span>
+                </div>
+              </button>
+
+              <button
+                role="menuitem"
+                className={`nav-submenu-item ${page === 'nutrition' ? 'active' : ''}`}
+                onClick={() => { onNavigate('nutrition'); setMenuSubOpen(false) }}
+                id="nav-sub-nutrition"
+              >
+                <span className="submenu-icon" aria-hidden="true">🥗</span>
+                <div className="submenu-text">
+                  <span className="submenu-title">Nutrition & Allergens</span>
+                  <span className="submenu-desc">Calories, macros & dietary safety</span>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
 
         {user && (
           <button

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { getWeeklyMenu } from '../../utils/menuStorage'
 import './Menu.css'
 
-export default function Menu() {
+export default function Menu({ onNavigate }) {
   const [weeklyMenu, setWeeklyMenu] = useState(() => getWeeklyMenu())
 
   useEffect(() => {
@@ -19,6 +19,27 @@ export default function Menu() {
 
   return (
     <section className="page-container menu-page">
+      {onNavigate && (
+        <div className="menu-nav-pills" role="tablist" aria-label="Menu Views">
+          <button
+            className="menu-nav-pill active"
+            type="button"
+            aria-selected="true"
+            id="tab-weekly-menu"
+          >
+            <span>📅</span> Weekly Mess Menu
+          </button>
+          <button
+            className="menu-nav-pill"
+            onClick={() => onNavigate('nutrition')}
+            type="button"
+            id="tab-nutrition-guide"
+          >
+            <span>🥗</span> Nutrition & Allergens
+          </button>
+        </div>
+      )}
+
       <p className="section-label">CHITKARA UNIVERSITY HOSTEL</p>
       <h1 className="page-title">Weekly mess menu</h1>
       <p className="page-description">

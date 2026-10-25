@@ -7,6 +7,7 @@ import SignupPage from './components/signup/SignupPage'
 import Login from './components/login/Login'
 import Dashboard from './components/dashboard/Dashboard'
 import Menu from './components/menu/Menu'
+import NutritionView from './components/nutrition/NutritionView'
 import NotificationCenter from './components/notifications/NotificationCenter'
 import ToastContainer from './components/notifications/ToastContainer'
 import { NotificationProvider } from './context/NotificationContext'
@@ -19,7 +20,7 @@ import { ToastProvider } from './context/ToastContext'
 function getInitialPage() {
   const params = new URLSearchParams(window.location.search)
   const view   = params.get('view')
-  if (view === 'login' || view === 'signup-page') return view
+  if (view === 'login' || view === 'signup-page' || view === 'menu' || view === 'nutrition') return view
   return 'home'
 }
 
@@ -106,7 +107,8 @@ export default function App() {
               />
             )}
             {effectivePage === 'dashboard'     && <Dashboard user={user} onHome={goHome} onLogout={handleLogout} />}
-            {effectivePage === 'menu'          && <Menu />}
+            {effectivePage === 'menu'          && <Menu onNavigate={navigate} />}
+            {effectivePage === 'nutrition'     && <NutritionView onNavigate={navigate} />}
             {effectivePage === 'notifications' && <NotificationCenter onNavigate={navigate} />}
           </main>
           <Footer />

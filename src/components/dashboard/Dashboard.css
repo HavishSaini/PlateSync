@@ -226,6 +226,311 @@
   color: var(--text-primary);
 }
 
+/* ─── Admin Dish Nutrition Management Styles ───────────────── */
+.dish-mgmt-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.dish-mgmt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dish-mgmt-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dish-mgmt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.dish-mgmt-item {
+  background: var(--ham-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.dish-mgmt-item:hover {
+  border-color: var(--accent);
+}
+
+.dish-mgmt-item.verified-border {
+  border-left: 3px solid var(--accent);
+}
+
+.dish-mgmt-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.dish-mgmt-item-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.dish-mgmt-nutri-line {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.dish-mgmt-nutri-line strong {
+  color: var(--text-primary);
+}
+
+.dish-mgmt-allergens-line {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.admin-allergen-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.admin-allergen-tag.confirmed {
+  background: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.admin-allergen-tag.safe {
+  background: rgba(19, 122, 80, 0.15);
+  color: var(--accent);
+}
+
+.admin-allergen-tag.unknown {
+  background: rgba(217, 119, 6, 0.15);
+  color: #d97706;
+}
+
+.dish-mgmt-edit-btn {
+  margin-top: auto;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s;
+  align-self: flex-start;
+}
+
+.dish-mgmt-edit-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── Dish Edit Modal ───────────────────────────────────────── */
+.dish-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.dish-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dish-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dish-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.dish-modal-close-btn {
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.dish-modal-close-btn:hover {
+  color: var(--text-primary);
+}
+
+.dish-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dish-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dish-form-field label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dish-form-input,
+.dish-form-textarea,
+.dish-form-select {
+  padding: 10px 12px;
+  font-size: 13.5px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--ham-bg);
+  color: var(--text-primary);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.dish-form-input:focus,
+.dish-form-textarea:focus,
+.dish-form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-card);
+}
+
+.dish-form-macros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.dish-allergen-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.allergen-check-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--ham-bg);
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+
+.allergen-check-item input {
+  accent-color: #dc2626;
+  cursor: pointer;
+}
+
+.verification-toggle-box {
+  background: rgba(19, 122, 80, 0.08);
+  border: 1px solid rgba(19, 122, 80, 0.25);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.verification-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.verification-toggle-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.dish-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── Dish Library Section ───────────────────────────────────── */
+.dish-lib-card {
+  margin-top: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.dish-lib-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
 @media(max-width:700px){
   .dashboard-welcome{flex-direction:column}
   .summary-grid{grid-template-columns:1fr}

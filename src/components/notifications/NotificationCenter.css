@@ -1,6 +1,4 @@
 /* ─── Page layout ───────────────────────────────────────────── */
-.nc-page { }
-
 .nc-page-header {
   display: flex;
   align-items: flex-end;

@@ -9,6 +9,11 @@ import {
   getMealTimes,
   getAttendancePeriodInfo,
   saveMealMenu,
+  parseDishesFromMenu,
+  getDishNutrition,
+  saveDishNutrition,
+  COMMON_ALLERGENS,
+  getAllMenuDishes,
 } from '../../utils/menuStorage'
 import {
   getAllLiveDemand,
@@ -264,7 +269,7 @@ function AdminView({ activeTab, user, currentTime }) {
   }
 
   if (activeTab === 'Issue reports') return <AdminIssueView user={user} />
-  if (activeTab === 'Menu management') return <AdminMenuManagement currentTime={currentTime} />
+  if (activeTab === 'Menu management') return <AdminMenuManagement currentTime={currentTime} user={user} />
   if (activeTab === 'Mark attendance') return <section className="admin-form"><p className="section-label">MESS STAFF ACTION</p><h2>Mark student attendance</h2><p>Enter the student roll number after serving their booked meal.</p><form onSubmit={markAttendance}><label>Student roll number<input value={rollNo} onChange={event => setRollNo(event.target.value)} placeholder="Enter roll number" /></label><button className="primary-button">Mark attended ✓</button></form>{notice && <p className="notice">{notice}</p>}<div className="attendance-total"><strong>{attendance}</strong><span>students marked attended in this session</span></div></section>
   if (activeTab === 'Waste analysis') return <WasteAnalysis />
   return <LiveDemand />
@@ -341,7 +346,483 @@ function NextMealEditor({ meal, isLocked }) {
   )
 }
 
-function AdminMenuManagement({ currentTime }) {
+function DishEditModal({ dish, onClose, onSave }) {
+  const [formData, setFormData] = useState({
+    name: dish.name || '',
+    mealCategory: dish.mealCategory || 'Breakfast',
+    servingSize: dish.servingSize || '',
+    calories: dish.calories !== null && dish.calories !== undefined ? dish.calories : '',
+    protein: dish.protein !== null && dish.protein !== undefined ? dish.protein : '',
+    carbs: dish.carbs !== null && dish.carbs !== undefined ? dish.carbs : '',
+    fat: dish.fat !== null && dish.fat !== undefined ? dish.fat : '',
+    fiber: dish.fiber !== null && dish.fiber !== undefined ? dish.fiber : '',
+    ingredients: dish.ingredients || '',
+    confirmedAllergens: Array.isArray(dish.confirmedAllergens) ? [...dish.confirmedAllergens] : [],
+    otherAllergens: Array.isArray(dish.confirmedAllergens)
+      ? dish.confirmedAllergens.filter(a => !COMMON_ALLERGENS.includes(a)).join(', ')
+      : '',
+    crossContact: Array.isArray(dish.crossContact)
+      ? dish.crossContact.join('\n')
+      : (dish.crossContact || ''),
+    verified: Boolean(dish.verified),
+    verificationNotes: dish.verificationNotes || '',
+  })
+
+  const [saving, setSaving] = useState(false)
+
+  const handleAllergenToggle = (allergen) => {
+    setFormData(prev => {
+      const exists = prev.confirmedAllergens.includes(allergen)
+      const next = exists
+        ? prev.confirmedAllergens.filter(a => a !== allergen)
+        : [...prev.confirmedAllergens, allergen]
+      return { ...prev, confirmedAllergens: next }
+    })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setSaving(true)
+
+    const customList = formData.otherAllergens
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+
+    const finalConfirmed = Array.from(new Set([
+      ...formData.confirmedAllergens.filter(a => COMMON_ALLERGENS.includes(a)),
+      ...customList,
+    ]))
+
+    const finalCrossContact = formData.crossContact
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean)
+
+    const payload = {
+      ...formData,
+      calories: formData.calories !== '' ? Number(formData.calories) : null,
+      protein: formData.protein !== '' ? Number(formData.protein) : null,
+      carbs: formData.carbs !== '' ? Number(formData.carbs) : null,
+      fat: formData.fat !== '' ? Number(formData.fat) : null,
+      fiber: formData.fiber !== '' ? Number(formData.fiber) : null,
+      confirmedAllergens: finalConfirmed,
+      crossContact: finalCrossContact,
+      verified: formData.verified,
+      verificationStatus: formData.verified ? 'verified' : 'unverified',
+    }
+
+    onSave(dish.name, payload)
+    setSaving(false)
+    onClose()
+  }
+
+  return (
+    <div className="dish-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dish-modal-title">
+      <div className="dish-modal">
+        <div className="dish-modal-header">
+          <h3 id="dish-modal-title">Edit Nutrition & Allergens: {dish.name}</h3>
+          <button className="dish-modal-close-btn" onClick={onClose} aria-label="Close dialog">×</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="dish-modal-body">
+          {/* Serving Size & Category */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="dish-form-field">
+              <label htmlFor="dish-category">Meal Category</label>
+              <select
+                id="dish-category"
+                className="dish-form-select"
+                value={formData.mealCategory}
+                onChange={e => setFormData({ ...formData, mealCategory: e.target.value })}
+              >
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Snacks">Snacks</option>
+                <option value="Dinner">Dinner</option>
+              </select>
+            </div>
+            <div className="dish-form-field">
+              <label htmlFor="dish-serving">Serving Size</label>
+              <input
+                id="dish-serving"
+                className="dish-form-input"
+                value={formData.servingSize}
+                onChange={e => setFormData({ ...formData, servingSize: e.target.value })}
+                placeholder="e.g. 1 bowl (150g)"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Nutritional Values */}
+          <div className="dish-form-field">
+            <label>Nutritional Values (per serving — clear if unknown)</label>
+            <div className="dish-form-macros">
+              <div>
+                <small style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Calories (kcal)</small>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  className="dish-form-input"
+                  value={formData.calories}
+                  onChange={e => setFormData({ ...formData, calories: e.target.value })}
+                  placeholder="kcal"
+                  id="dish-cal-input"
+                />
+              </div>
+              <div>
+                <small style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Protein (g)</small>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  className="dish-form-input"
+                  value={formData.protein}
+                  onChange={e => setFormData({ ...formData, protein: e.target.value })}
+                  placeholder="g"
+                />
+              </div>
+              <div>
+                <small style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Carbs (g)</small>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  className="dish-form-input"
+                  value={formData.carbs}
+                  onChange={e => setFormData({ ...formData, carbs: e.target.value })}
+                  placeholder="g"
+                />
+              </div>
+              <div>
+                <small style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Total Fat (g)</small>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  className="dish-form-input"
+                  value={formData.fat}
+                  onChange={e => setFormData({ ...formData, fat: e.target.value })}
+                  placeholder="g"
+                />
+              </div>
+              <div>
+                <small style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Fiber (g)</small>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  className="dish-form-input"
+                  value={formData.fiber}
+                  onChange={e => setFormData({ ...formData, fiber: e.target.value })}
+                  placeholder="g"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Ingredients */}
+          <div className="dish-form-field">
+            <label htmlFor="dish-ingredients">Ingredient List</label>
+            <textarea
+              id="dish-ingredients"
+              className="dish-form-textarea"
+              rows={2}
+              value={formData.ingredients}
+              onChange={e => setFormData({ ...formData, ingredients: e.target.value })}
+              placeholder="e.g. Whole wheat flour, boiled potatoes, green chili, spices, oil"
+            />
+          </div>
+
+          {/* Confirmed Allergens */}
+          <div className="dish-form-field">
+            <label>Confirmed Allergens Present in Dish</label>
+            <div className="dish-allergen-checkboxes">
+              {COMMON_ALLERGENS.map(allergen => (
+                <label key={allergen} className="allergen-check-item">
+                  <input
+                    type="checkbox"
+                    checked={formData.confirmedAllergens.includes(allergen)}
+                    onChange={() => handleAllergenToggle(allergen)}
+                  />
+                  <span>{allergen}</span>
+                </label>
+              ))}
+            </div>
+            <div style={{ marginTop: 6 }}>
+              <input
+                className="dish-form-input"
+                style={{ width: '100%' }}
+                value={formData.otherAllergens}
+                onChange={e => setFormData({ ...formData, otherAllergens: e.target.value })}
+                placeholder="Other allergens (comma separated, e.g. Mustard, Celery, Shellfish)"
+              />
+            </div>
+          </div>
+
+          {/* Cross Contact Warnings */}
+          <div className="dish-form-field">
+            <label htmlFor="dish-cross">Possible Cross-Contact Warnings (One per line)</label>
+            <textarea
+              id="dish-cross"
+              className="dish-form-textarea"
+              rows={2}
+              value={formData.crossContact}
+              onChange={e => setFormData({ ...formData, crossContact: e.target.value })}
+              placeholder="e.g. Shared tawa used for dairy or gluten items"
+            />
+          </div>
+
+          {/* Verification Status */}
+          <div className="verification-toggle-box">
+            <label className="verification-toggle-label">
+              <input
+                type="checkbox"
+                checked={formData.verified}
+                onChange={e => setFormData({ ...formData, verified: e.target.checked })}
+                id="dish-verified-checkbox"
+              />
+              <span>Mark as Officially Verified by Kitchen Dietitian</span>
+            </label>
+            <input
+              className="dish-form-input"
+              value={formData.verificationNotes}
+              onChange={e => setFormData({ ...formData, verificationNotes: e.target.value })}
+              placeholder="Verification Notes (e.g. Verified by Hostel Mess Dietitian)"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="dish-modal-actions">
+            <button type="button" className="secondary-button" onClick={onClose} disabled={saving}>
+              Cancel
+            </button>
+            <button type="submit" className="primary-button" disabled={saving} id="dish-modal-save-btn">
+              {saving ? 'Saving...' : 'Save Dish Details ✓'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function MealDishesNutritionEditor({ meal, isLocked }) {
+  const [editingDish, setEditingDish] = useState(null)
+  const [successMsg, setSuccessMsg] = useState(null)
+  const { addNotification } = useNotifications()
+
+  // Extract dishes in the current target meal
+  const dishesInMeal = useMemo(() => {
+    return parseDishesFromMenu(meal.menu)
+  }, [meal.menu])
+
+  // Get nutrition data for dishes
+  const [dishesData, setDishesData] = useState(() => {
+    return dishesInMeal.map(name => getDishNutrition(name))
+  })
+
+  // Refresh dishes data when meal.menu changes or nutrition updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      setDishesData(dishesInMeal.map(name => getDishNutrition(name)))
+    }
+    handleUpdate()
+    window.addEventListener('plateSyncNutritionUpdate', handleUpdate)
+    return () => window.removeEventListener('plateSyncNutritionUpdate', handleUpdate)
+  }, [dishesInMeal])
+
+  const handleSaveDish = (dishName, data) => {
+    const res = saveDishNutrition(dishName, data)
+    if (res.success) {
+      setDishesData(prev => prev.map(d => (d.name === dishName ? res.dish : d)))
+      setSuccessMsg(`Nutrition details for "${dishName}" updated successfully!`)
+      setTimeout(() => setSuccessMsg(null), 4000)
+
+      addNotification({
+        title: 'Dish Nutrition Updated',
+        message: `Admin updated nutrition and allergen facts for "${dishName}". Live on student portal.`,
+        category: 'menu',
+        eventKey: `nutrition_edit_${dishName}_${Date.now()}`,
+        actionLabel: 'View Nutrition',
+        actionPage: 'nutrition',
+      })
+    }
+  }
+
+  return (
+    <div className="dish-mgmt-section">
+      <div className="dish-mgmt-header">
+        <div>
+          <h4>Dish Nutrition & Allergen Information for {meal.name}</h4>
+          <small style={{ color: 'var(--text-secondary)' }}>
+            Configure nutritional facts, confirmed allergens, and cross-contact advisories for dishes in this meal.
+            {isLocked && ' (Note: Meal menu is locked for bookings; editing nutrition details does not alter confirmed meal bookings.)'}
+          </small>
+        </div>
+        {successMsg && <span className="menu-mgmt-success">{successMsg}</span>}
+      </div>
+
+      <div className="dish-mgmt-grid">
+        {dishesData.map(dish => {
+          const hasNutrition = dish.calories !== null && dish.calories !== undefined
+          const confirmed = Array.isArray(dish.confirmedAllergens) ? dish.confirmedAllergens : []
+
+          return (
+            <div
+              key={dish.name}
+              className={`dish-mgmt-item ${dish.verified ? 'verified-border' : ''}`}
+            >
+              <div className="dish-mgmt-item-header">
+                <h5 className="dish-mgmt-item-name">{dish.name}</h5>
+                {dish.verified ? (
+                  <span className="v-badge verified" style={{ fontSize: 10 }}>✓ Verified</span>
+                ) : (
+                  <span className="v-badge unverified" style={{ fontSize: 10 }}>⚠️ Estimate</span>
+                )}
+              </div>
+
+              <div className="dish-mgmt-nutri-line">
+                {hasNutrition ? (
+                  <span>
+                    <strong>{dish.calories} kcal</strong> · P: {dish.protein}g · C: {dish.carbs}g · F: {dish.fat}g
+                  </span>
+                ) : (
+                  <span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>
+                    Nutrition info not available
+                  </span>
+                )}
+              </div>
+
+              <div className="dish-mgmt-allergens-line">
+                {confirmed.length > 0 ? (
+                  confirmed.map(a => (
+                    <span key={a} className="admin-allergen-tag confirmed">
+                      ⚠️ {a}
+                    </span>
+                  ))
+                ) : dish.verified ? (
+                  <span className="admin-allergen-tag safe">✓ No common allergens</span>
+                ) : (
+                  <span className="admin-allergen-tag unknown">❓ Unknown allergen status</span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                className="dish-mgmt-edit-btn"
+                onClick={() => setEditingDish(dish)}
+                id={`edit-dish-${dish.name.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                Edit Nutrition & Allergens ✏️
+              </button>
+            </div>
+          )
+        })}
+      </div>
+
+      {editingDish && (
+        <DishEditModal
+          dish={editingDish}
+          onClose={() => setEditingDish(null)}
+          onSave={handleSaveDish}
+        />
+      )}
+    </div>
+  )
+}
+
+function HostelDishLibrary() {
+  const [allDishes, setAllDishes] = useState(() => getAllMenuDishes())
+  const [selectedDishName, setSelectedDishName] = useState('')
+  const [editingDish, setEditingDish] = useState(null)
+  const [statusMsg, setStatusMsg] = useState(null)
+  const { addNotification } = useNotifications()
+
+  useEffect(() => {
+    const handleUpdate = () => setAllDishes(getAllMenuDishes())
+    window.addEventListener('plateSyncNutritionUpdate', handleUpdate)
+    return () => window.removeEventListener('plateSyncNutritionUpdate', handleUpdate)
+  }, [])
+
+  const selectedDish = useMemo(() => {
+    if (!selectedDishName) return null
+    return allDishes.find(d => d.name === selectedDishName) || null
+  }, [allDishes, selectedDishName])
+
+  const handleSave = (dishName, data) => {
+    const res = saveDishNutrition(dishName, data)
+    if (res.success) {
+      setAllDishes(getAllMenuDishes())
+      setStatusMsg(`Nutrition details for "${dishName}" saved successfully!`)
+      setTimeout(() => setStatusMsg(null), 4000)
+
+      addNotification({
+        title: 'Dish Nutrition Updated',
+        message: `Admin updated nutrition facts for "${dishName}".`,
+        category: 'menu',
+        eventKey: `nutrition_edit_lib_${dishName}_${Date.now()}`,
+        actionLabel: 'View Nutrition',
+        actionPage: 'nutrition',
+      })
+    }
+  }
+
+  return (
+    <div className="dish-lib-card">
+      <p className="section-label">CURATED MENU CATALOG</p>
+      <h3 style={{ margin: '0 0 6px', fontSize: 18, color: 'var(--text-primary)' }}>
+        Hostel Dish Nutrition & Allergen Library
+      </h3>
+      <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 14px' }}>
+        Select any dish from the weekly mess schedule to configure or verify its nutritional profile, ingredients, and allergen warnings.
+      </p>
+
+      <div className="dish-lib-row">
+        <select
+          className="dish-form-select"
+          style={{ minWidth: 260 }}
+          value={selectedDishName}
+          onChange={e => setSelectedDishName(e.target.value)}
+          id="admin-dish-lib-select"
+        >
+          <option value="">-- Choose a dish to inspect or edit --</option>
+          {allDishes.map(d => (
+            <option key={d.norm} value={d.name}>
+              {d.name} ({d.primaryMeal}) {d.verified ? '✓ Verified' : '⚠️ Unverified'}
+            </option>
+          ))}
+        </select>
+
+        {selectedDish && (
+          <button
+            type="button"
+            className="primary-button"
+            style={{ padding: '9px 16px', fontSize: 13 }}
+            onClick={() => setEditingDish(selectedDish)}
+            id="admin-edit-selected-dish-btn"
+          >
+            Edit {selectedDish.name} Details ✏️
+          </button>
+        )}
+
+        {statusMsg && <span className="menu-mgmt-success">{statusMsg}</span>}
+      </div>
+
+      {editingDish && (
+        <DishEditModal
+          dish={editingDish}
+          onClose={() => setEditingDish(null)}
+          onSave={handleSave}
+        />
+      )}
+    </div>
+  )
+}
+
+function AdminMenuManagement({ currentTime, user }) {
   const nextInfo = getNextEligibleMeal(currentTime)
   const { meal, dateStr, isTomorrow, bookingStart, isLocked, lockReason } = nextInfo
   const minutesToBooking = Math.max(0, Math.ceil((bookingStart - currentTime) / 60000))
@@ -376,7 +857,7 @@ function AdminMenuManagement({ currentTime }) {
 
         {isLocked ? (
           <div className="menu-mgmt-notice locked" role="alert">
-            ⚠️ {lockReason || 'Menu locked because student booking has started.'} Modifications to this meal are no longer accepted.
+            ⚠️ {lockReason || 'Menu locked because student booking has started.'} Modifications to this meal menu are no longer accepted. Existing dish nutrition details can still be updated.
           </div>
         ) : (
           <div className="menu-mgmt-notice editable">
@@ -389,10 +870,20 @@ function AdminMenuManagement({ currentTime }) {
           meal={meal}
           isLocked={isLocked}
         />
+
+        {/* Dish nutrition manager for this meal */}
+        <MealDishesNutritionEditor
+          meal={meal}
+          isLocked={isLocked}
+          user={user}
+        />
       </div>
 
+      {/* Full Hostel Menu Dish Nutrition Library */}
+      <HostelDishLibrary user={user} />
+
       {/* Daily Schedule Overview */}
-      <div>
+      <div style={{ marginTop: 24 }}>
         <p className="section-label">DAILY SCHEDULE OVERVIEW</p>
         <h3 style={{ margin: '0 0 6px', fontSize: 18, color: 'var(--text-primary)' }}>All Meals Status</h3>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 14px' }}>

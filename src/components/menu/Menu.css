@@ -3,6 +3,42 @@
   padding-bottom: 40px;
 }
 
+.menu-nav-pills {
+  display: inline-flex;
+  gap: 8px;
+  background: var(--ham-bg);
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.menu-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.menu-nav-pill:hover {
+  color: var(--text-primary);
+}
+
+.menu-nav-pill.active {
+  background: var(--bg-card);
+  color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
 .menu-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--border);
