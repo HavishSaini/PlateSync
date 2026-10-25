@@ -11,6 +11,7 @@ import NutritionView from './components/nutrition/NutritionView'
 import NotificationCenter from './components/notifications/NotificationCenter'
 import ToastContainer from './components/notifications/ToastContainer'
 import HowToUse from './components/common/HowToUse'
+import ContactUs from './components/common/ContactUs'
 import { NotificationProvider } from './context/NotificationContext'
 import { ToastProvider } from './context/ToastContext'
 
@@ -21,7 +22,7 @@ import { ToastProvider } from './context/ToastContext'
 function getInitialPage() {
   const params = new URLSearchParams(window.location.search)
   const view   = params.get('view')
-  if (view === 'login' || view === 'signup-page' || view === 'menu' || view === 'nutrition' || view === 'how-to-use') return view
+  if (view === 'login' || view === 'signup-page' || view === 'menu' || view === 'nutrition' || view === 'how-to-use' || view === 'contact') return view
   return 'home'
 }
 
@@ -115,6 +116,7 @@ export default function App() {
             {effectivePage === 'nutrition'     && <NutritionView onNavigate={navigate} />}
             {effectivePage === 'notifications' && <NotificationCenter onNavigate={navigate} />}
             {effectivePage === 'how-to-use'    && <HowToUse onNavigate={navigate} user={user} />}
+            {effectivePage === 'contact'       && <ContactUs onNavigate={navigate} user={user} />}
           </main>
           <Footer onNavigate={navigate} />
           {/* Global toast container — renders on top of everything */}

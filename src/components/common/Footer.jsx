@@ -23,7 +23,7 @@ export default function Footer({ onNavigate }) {
           <button type="button" onClick={() => handleNav('home')}>Home</button>
           <button type="button" onClick={() => handleNav('menu')}>Menu</button>
           <button type="button" onClick={() => handleNav('how-to-use')}>About</button>
-          <button type="button" onClick={() => handleNav('how-to-use')}>Contact</button>
+          <button type="button" onClick={() => handleNav('contact')} id="footer-contact-btn">Contact</button>
         </nav>
 
         <div className="footer-tagline">

@@ -209,6 +209,16 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                 <span className="ham-nav-text">How to Use</span>
                 <span className="ham-nav-badge">Guide</span>
               </button>
+
+              <button
+                className={`ham-nav-item ${page === 'contact' ? 'active' : ''}`}
+                onClick={() => { onNavigate('contact'); setMenuOpen(false) }}
+                role="menuitem"
+                id="ham-contact-us"
+              >
+                <span className="ham-nav-icon">💬</span>
+                <span className="ham-nav-text">Contact Us</span>
+              </button>
             </div>
           )}
         </div>
