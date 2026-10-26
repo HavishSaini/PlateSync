@@ -16,7 +16,7 @@
 .dashboard-head > p { max-width: 300px; font-size: 12px; color: var(--text-secondary); text-align: right; }
 .dashboard-meals { display: grid; grid-template-columns: repeat(2,1fr); gap: 13px; }
 .simple-logic { margin-top: 42px; background: var(--simple-logic-bg, #e5f4d9); border-radius: 11px; padding: 29px; display: grid; grid-template-columns: 1fr 1fr; gap: 25px; transition: background 0.25s; }
-[data-theme="dark"] .simple-logic { --simple-logic-bg: #0e2118; }
+[data-theme="dark"] .simple-logic { --simple-logic-bg: #222D29; }
 .simple-logic h2 { margin: 0 0 10px; font-size: 24px; color: var(--text-primary); }
 .simple-logic p:not(.section-label) { color: var(--text-secondary); line-height: 1.6; font-size: 14px; }
 .formula { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 10px; }
@@ -24,16 +24,16 @@
 .formula strong { color: var(--accent); }
 .formula b { color: var(--accent); }
 .attendance-view>p:not(.section-label),.admin-form>p:not(.section-label) { color: var(--text-secondary); font-size: 14px; }
-.timer-card { margin: 25px 0; padding: 27px; border-radius: 11px; background: #153d2d; color: white; text-align: center; }
-.timer-card span,.timer-card small { display: block; color: #bed5c6; font-size: 10px; letter-spacing: .7px; }
-.timer-card strong { display: block; font-size: 42px; letter-spacing: 2px; margin: 10px; color: #c2f47d; }
+.timer-card { margin: 25px 0; padding: 27px; border-radius: 11px; background: #1B2422; border: 1px solid var(--border); color: white; text-align: center; }
+.timer-card span,.timer-card small { display: block; color: var(--text-secondary); font-size: 10px; letter-spacing: .7px; }
+.timer-card strong { display: block; font-size: 42px; letter-spacing: 2px; margin: 10px; color: var(--accent-mint); }
 .attendance-list { display: grid; gap: 8px; }
 .attendance-list div { display: flex; justify-content: space-between; border: 1px solid var(--border); padding: 13px; background: var(--bg-card); border-radius: 7px; font-size: 13px; transition: background 0.25s, border-color 0.25s; }
 .attendance-list b { font-size: 11px; }
 .confirmed { color: var(--accent); }
 .pending { color: var(--text-secondary); }
 .impact-score { margin: 22px 0; padding: 28px; background: var(--impact-score-bg, #e5f4d9); border-radius: 11px; display: flex; align-items: center; gap: 28px; transition: background 0.25s; }
-[data-theme="dark"] .impact-score { --impact-score-bg: #0e2118; }
+[data-theme="dark"] .impact-score { --impact-score-bg: #222D29; }
 .impact-score strong { font-size: 48px; color: var(--accent); }
 .impact-score strong small { font-size: 15px; color: var(--text-secondary); }
 .impact-score p { max-width: 390px; color: var(--text-secondary); line-height: 1.55; }

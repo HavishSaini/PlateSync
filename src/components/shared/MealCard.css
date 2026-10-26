@@ -1,7 +1,7 @@
 .meal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 11px; padding: 17px; transition: background 0.25s, border-color 0.25s; }
 .meal-card-head { display: flex; align-items: center; gap: 10px; }
-.meal-card-head > span { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 9px; background: var(--meal-icon-bg, #e9f7df); font-size: 20px; }
-[data-theme="dark"] .meal-card-head > span { --meal-icon-bg: #1a3d26; }
+.meal-card-head > span { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 9px; background: var(--meal-icon-bg, #e9f7df); font-size: 20px; color: var(--accent); }
+[data-theme="dark"] .meal-card-head > span { --meal-icon-bg: #222D29; }
 .meal-card h3 { margin: 0; font-size: 16px; color: var(--text-primary); }
 .meal-card small { color: var(--text-secondary); font-size: 11px; }
 .meal-card-head b { margin-left: auto; font-size: 10px; padding: 5px 7px; border-radius: 5px; }

@@ -6,6 +6,33 @@
   transition: background 0.25s;
 }
 
+[data-theme="dark"] .footer {
+  background: #101716;
+  border-top: 1px solid #303B36;
+  color: #A7B2AD;
+}
+
+[data-theme="dark"] .footer-logo {
+  color: #F3F5F4;
+}
+
+[data-theme="dark"] .footer-logo span {
+  background: #36B887;
+  color: #101716;
+}
+
+[data-theme="dark"] .footer-links button {
+  color: #A7B2AD;
+}
+
+[data-theme="dark"] .footer-links button:hover {
+  color: #36B887;
+}
+
+[data-theme="dark"] .footer-tagline {
+  color: #6c7873;
+}
+
 .footer-inner {
   max-width: 1200px;
   margin: 0 auto;

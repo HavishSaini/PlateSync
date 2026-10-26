@@ -35,28 +35,33 @@
   background: var(--bg-page);
 }
 
-/* ─── Dark theme ───────────────────────────────────────────── */
+/* ─── Dark theme (Premium Charcoal, Muted Emerald & Warm Accent) ─── */
 [data-theme="dark"] {
   /* Text */
-  --text-primary:   #dff0e8;
-  --text-secondary: #96b5a4;
+  --text-primary:   #F3F5F4;
+  --text-secondary: #A7B2AD;
 
-  /* Surfaces — comfortable mid-dark, not near-black */
-  --bg-page:        #232e28;
-  --bg-card:        #2c3d34;
-  --nav-bg:         #28382f;
-  --dropdown-bg:    #2f4037;
+  /* Surfaces */
+  --bg-page:        #101716; /* Main background */
+  --bg-section:     #151D1B; /* Secondary section background */
+  --bg-card:        #1B2422; /* Card background */
+  --bg-elevated:    #222D29; /* Elevated cards and inputs */
+  --nav-bg:         #101716;
+  --dropdown-bg:    #1B2422;
 
   /* Accents */
-  --accent:         #3ecf84;
-  --accent-hover:   #34b872;
-  --notice-bg:      #263d2e;
-  --notice-text:    #6ddda4;
+  --accent:         #36B887; /* Primary accent green */
+  --accent-hover:   #2ea075;
+  --accent-mint:    #79CDA8; /* Muted mint green */
+  --accent-warm:    #D9B879; /* Subtle warm accent for food highlights */
+  --notice-bg:      #182621;
+  --notice-text:    #79CDA8;
 
   /* Borders / subtle */
-  --border:         #3d5447;
-  --ham-bg:         #2f4037;
-  --ham-bg-hover:   #364838;
+  --border:         #303B36; /* Borders and dividers */
+  --border-subtle:  #25312C;
+  --ham-bg:         #1B2422;
+  --ham-bg-hover:   #222D29;
 
   color:      var(--text-primary);
   background: var(--bg-page);
@@ -97,7 +102,7 @@ h1, h2, h3, h4, h5, h6 {
 [data-theme="dark"] h4,
 [data-theme="dark"] h5,
 [data-theme="dark"] h6 {
-  color: #eaf6ee;
+  color: #F3F5F4;
 }
 
 button {

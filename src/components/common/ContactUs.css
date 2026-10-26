@@ -34,8 +34,8 @@
 }
 
 [data-theme="dark"] .contact-kicker {
-  background: rgba(62, 207, 132, 0.15);
-  color: #3ecf84;
+  background: rgba(54, 184, 135, 0.15);
+  color: #36B887;
 }
 
 .contact-hero h1 {
@@ -47,7 +47,7 @@
 }
 
 [data-theme="dark"] .contact-hero h1 {
-  color: #eaf6ee;
+  color: #F3F5F4;
 }
 
 .contact-hero p {
@@ -146,7 +146,7 @@
 }
 
 [data-theme="dark"] .contact-hostel-hours h4 {
-  color: #eaf6ee;
+  color: #F3F5F4;
 }
 
 .contact-hostel-hours p {
@@ -169,8 +169,8 @@
 }
 
 [data-theme="dark"] .hours-pill {
-  background: rgba(62, 207, 132, 0.12);
-  color: #3ecf84;
+  background: rgba(54, 184, 135, 0.15);
+  color: #36B887;
 }
 
 /* ─── Form Column ────────────────────────────────────────────── */
@@ -194,7 +194,7 @@
 }
 
 [data-theme="dark"] .contact-form-header h3 {
-  color: #eaf6ee;
+  color: #F3F5F4;
 }
 
 .contact-form-header p {
@@ -245,8 +245,14 @@
 .contact-select:focus,
 .contact-textarea:focus {
   outline: none;
-  border-color: #138052;
-  box-shadow: 0 0 0 3px rgba(19, 128, 82, 0.12);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(54, 184, 135, 0.16);
+}
+
+[data-theme="dark"] .contact-input,
+[data-theme="dark"] .contact-select,
+[data-theme="dark"] .contact-textarea {
+  background: var(--bg-elevated);
 }
 
 .contact-textarea {
@@ -260,7 +266,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #138052;
+  background: var(--accent);
   color: #ffffff;
   font-size: 15px;
   font-weight: 700;
@@ -273,8 +279,13 @@
   margin-top: 4px;
 }
 
+[data-theme="dark"] .contact-submit-btn {
+  color: #101716;
+  box-shadow: 0 4px 14px rgba(54, 184, 135, 0.28);
+}
+
 .contact-submit-btn:hover:not(:disabled) {
-  background: #0f6c44;
+  background: var(--accent-hover);
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(19, 128, 82, 0.35);
 }

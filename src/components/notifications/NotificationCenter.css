@@ -216,10 +216,10 @@
 .nc-cat-menu         { background: #fde8f8; color: #812b78; }
 .nc-cat-general      { background: var(--border); color: var(--text-secondary); }
 
-[data-theme="dark"] .nc-cat-booking      { background: #0e3320; color: #6ddda4; }
-[data-theme="dark"] .nc-cat-announcement { background: #3a2d00; color: #ffd466; }
-[data-theme="dark"] .nc-cat-reminder     { background: #0d1e44; color: #7fa6f5; }
-[data-theme="dark"] .nc-cat-menu         { background: #36103c; color: #e07ad0; }
+[data-theme="dark"] .nc-cat-booking      { background: rgba(54, 184, 135, 0.15); color: #79CDA8; }
+[data-theme="dark"] .nc-cat-announcement { background: rgba(217, 184, 121, 0.15); color: #D9B879; }
+[data-theme="dark"] .nc-cat-reminder     { background: rgba(96, 165, 250, 0.15); color: #93c5fd; }
+[data-theme="dark"] .nc-cat-menu         { background: rgba(217, 184, 121, 0.12); color: #D9B879; }
 
 .nc-card-time {
   font-size: 11px;
