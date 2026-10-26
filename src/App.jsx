@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import './App.css'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
@@ -14,6 +15,7 @@ import HowToUse from './components/common/HowToUse'
 import ContactUs from './components/common/ContactUs'
 import { NotificationProvider } from './context/NotificationContext'
 import { ToastProvider } from './context/ToastContext'
+import { login as loginAction, logout as logoutAction } from './store/slices/authSlice'
 
 // ---------------------------------------------------------------------------
 // Read ?view= param so that the Navbar "Login / Sign Up" links can still open
@@ -30,16 +32,16 @@ function getInitialPage() {
 // App
 // ---------------------------------------------------------------------------
 export default function App() {
+  const dispatch = useDispatch()
+
+  // Read authenticated user directly from the Redux Toolkit store
+  const user = useSelector((state) => state.auth.user)
+
   // current visible page
   const [page, setPage] = useState(getInitialPage)
 
   // optional extra data passed alongside a navigation (e.g. signupSuccess flag)
   const [pageExtra, setPageExtra] = useState(null)
-
-  // logged-in user object (null = not logged in)
-  const [user, setUser] = useState(
-    () => JSON.parse(localStorage.getItem('plateSyncUser')) || null
-  )
 
   const [darkMode, setDarkMode] = useState(false)
 
@@ -65,16 +67,15 @@ export default function App() {
     setPageExtra(extra)
   }
 
-  // ── Auth callbacks ─────────────────────────────────────────────────────────
+  // ── Auth callbacks powered by Redux Actions ───────────────────────────────
   const handleLogin = (loggedInUser) => {
-    setUser(loggedInUser)
+    dispatch(loginAction(loggedInUser))
     setPage('dashboard')
     setPageExtra(null)
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('plateSyncUser')
-    setUser(null)
+    dispatch(logoutAction())
     setPage('home')
     setPageExtra(null)
   }

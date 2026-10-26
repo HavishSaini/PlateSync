@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faArrowRight,
@@ -6,9 +7,11 @@ import {
   faRightToBracket
 } from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
+import { login as loginAction } from '../../store/slices/authSlice'
 import './Login.css'
 
 export default function Login({ onNavigate, onLogin, signupSuccess }) {
+  const dispatch = useDispatch()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -48,6 +51,9 @@ export default function Login({ onNavigate, onLogin, signupSuccess }) {
         message: `Welcome back, ${sessionUser.fullName?.split(' ')[0] || 'there'}!`,
         type: 'success',
       })
+
+      // Dispatch to global Redux store
+      dispatch(loginAction(sessionUser))
 
       if (onLogin) onLogin(sessionUser)
     }, 600)
