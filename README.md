@@ -48,34 +48,51 @@ The root cause is a lack of advance headcounts and disconnected communication be
 - **Bell Notification Center** — Dedicated notification history panel with unread badge counters, time-ago formatting, category tags, and action shortcuts.
 
 ### 📖 "How to Use" Interactive Guide
-- Accessible directly from the top-right hamburger menu.
+- Accessible directly from the top-right hamburger menu and navigation bar.
 - Role-specific step-by-step interactive workflows for both **Students** and **Mess Admins**.
 - Reference guide for meal timings and booking windows.
 - Collapsible FAQ addressing common booking, menu duration, and allergy questions.
 
+### ✉️ Mess Administration Contact Hub
+- Interactive contact form with local message persistence and category triage.
+- Campus office location, direct administration support email, and emergency contact details.
+- Working dining hall operating hours and support response SLAs.
+
+### 🌓 Premium Dual-Theme System
+- Light and dark themes built using bespoke CSS design tokens with instantaneous toggling.
+- Dark theme designed with deep charcoal backgrounds (`#101716`, `#151D1B`), elevated cards (`#1B2422`, `#222D29`), emerald accents (`#36B887`), and warm ambient amber highlights (`#D9B879`).
+
 ---
 
-## 🧭 App Navigation & Views
+## 🧭 App Navigation & Routes (React Router SPA)
 
-| Route / View | Key Purpose |
-| :--- | :--- |
-| `home` | Landing page showcasing sustainability statistics and quick entry points. |
-| `login` / `signup-page` | Role-based authentication (Student `@chitkara.edu.in` vs Admin). |
-| `dashboard` | Dynamic role dashboard (Student bookings & impact / Admin demand & waste). |
-| `menu` | Full 7-day weekly schedule with date-specific overrides. |
-| `nutrition` | Dietary breakdown, macro filters (High Protein / High Fiber / Low Fat), and allergens. |
-| `notifications` | Notification center with unread badges, filter tabs, and action links. |
-| `how-to-use` | Comprehensive user guide and operational procedures. |
+| Route Path | Key Purpose | Access / Guard |
+| :--- | :--- | :--- |
+| `/` | Landing page showcasing sustainability metrics, meal booking blueprint, and live demand preview. | Public |
+| `/menu` | Full 7-day weekly schedule with date-specific overrides. | Public |
+| `/nutrition` | Dietary breakdown, macro filters (High Protein / High Fiber / Low Fat), and interactive allergen shields. | Public |
+| `/how-to-use` | Comprehensive interactive operational guide and FAQs for students and mess managers. | Public |
+| `/contact` | Mess administration contact form with campus office hours, phone, and inquiry dispatch. | Public |
+| `/login` | User authentication via Chitkara university email (`@chitkara.edu.in`). | Guest only (auto-redirects to `/dashboard` if logged in) |
+| `/signup` | Multi-role account registration with live password requirement validation. | Guest only (auto-redirects to `/dashboard` if logged in) |
+| `/dashboard` | Student meal bookings & sustainability impact or Mess Admin demand forecasting & menu management. | **Protected Route** (redirects guests to `/login`) |
+| `/notifications`| Notification center with real-time alerts, unread counts, and category badges. | **Protected Route** (redirects guests to `/login`) |
 
 ---
 
 ## 🛠️ Tech Stack & Architecture
 
-- **Frontend:** [React 19](https://react.dev/) (Component-based architecture, Hooks discipline)
-- **Tooling & Bundler:** [Vite 8](https://vite.dev/) (Lightning-fast HMR and optimized production builds)
-- **Styling:** Vanilla CSS with custom design tokens, dark/light themes, and glassmorphism (no bulky UI frameworks)
+- **Frontend Core:** [React 19](https://react.dev/) (Functional components, custom hooks, and modern hooks discipline)
+- **Routing & Navigation:** [React Router 7](https://reactrouter.com/) (`BrowserRouter`, declarative `<Routes>`, `<Route>`, `<NavLink>`, `<Link>`, and state-aware `<ProtectedRoute>` route guards)
+- **Global State Management:** [Redux Toolkit (RTK)](https://redux-toolkit.js.org/) + `react-redux`
+  - Centralized store configuration (`configureStore`)
+  - Authentication & session slice (`authSlice`) with Immer immutability and `localStorage` synchronization
+  - Redux DevTools enabled for time-travel debugging
+- **Context API & Events:** React Context (`NotificationContext`, `ToastContext`) + Custom Event-driven bus (`plateSyncMenuUpdate`, `plateSyncNotificationAdded`)
+- **Tooling & Bundler:** [Vite 8](https://vite.dev/) (Instant HMR and production bundle optimization)
+- **Typography & Icons:** [Inter Variable Font](https://fontsource.org/fonts/inter) + [Font Awesome](https://fontawesome.com/) icons
+- **Styling:** Premium Vanilla CSS with tailored design tokens, modern charcoal & emerald dark mode palette, glassmorphism, and responsive clamp typography
 - **Linter & Static Analysis:** [Oxlint](https://oxc.rs/) (High-performance Rust-based linter)
-- **State & Communication:** React Context (`NotificationContext`, `ToastContext`) + Custom Event-driven bus (`plateSyncMenuUpdate`, `plateSyncNotificationAdded`) + `localStorage` persistence layer.
 
 ---
 
@@ -85,24 +102,32 @@ The root cause is a lack of advance headcounts and disconnected communication be
 PlateSync/
 ├── public/                       # Favicon and static assets
 ├── src/
-│   ├── App.jsx                   # Central routing & theme state coordinator
+│   ├── App.jsx                   # Central declarative router (<Routes>, <Route>) & theme coordinator
 │   ├── App.css                   # Global shell styles
-│   ├── index.css                 # CSS variables, color tokens, and base resets
-│   ├── main.jsx                  # React DOM entry point
+│   ├── index.css                 # CSS variables, color tokens, and base typography resets
+│   ├── main.jsx                  # React DOM entry point (<Provider>, <BrowserRouter>)
+│   ├── store/                    # Redux Toolkit store architecture
+│   │   ├── index.js              # Central Redux store configuration
+│   │   └── slices/
+│   │       └── authSlice.js      # User authentication slice (login, logout, updateUser)
 │   ├── components/
 │   │   ├── common/
-│   │   │   ├── Navbar.jsx        # Navigation bar, submenu, notification bell & hamburger
+│   │   │   ├── Navbar.jsx        # Navigation bar with NavLinks, active indicator & theme switch
 │   │   │   ├── Navbar.css
-│   │   │   ├── Footer.jsx        # Application footer
+│   │   │   ├── Footer.jsx        # Application footer with React Router Links
+│   │   │   ├── Footer.css
+│   │   │   ├── ProtectedRoute.jsx# State-aware route guard with redirect memory
 │   │   │   ├── HowToUse.jsx      # Interactive guide page (Students & Admins)
-│   │   │   └── HowToUse.css
+│   │   │   ├── HowToUse.css
+│   │   │   ├── ContactUs.jsx     # Contact administration inquiry view
+│   │   │   └── ContactUs.css
 │   │   ├── home/                 # Landing page
 │   │   ├── dashboard/            # Student & Admin operational dashboard
 │   │   ├── menu/                 # Weekly mess menu view
 │   │   ├── nutrition/            # Nutrition & allergen filtering view
 │   │   ├── notifications/        # NotificationCenter & ToastContainer
 │   │   ├── issues/               # IssueReportView & AdminIssueView
-│   │   ├── login/                # Authentication views
+│   │   ├── login/                # Authentication views with Redux dispatch & redirect memory
 │   │   ├── signup/
 │   │   └── shared/               # Reusable components (MealCard, etc.)
 │   ├── context/
