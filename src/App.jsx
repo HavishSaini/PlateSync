@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import './App.css'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
@@ -15,34 +16,12 @@ import HowToUse from './components/common/HowToUse'
 import ContactUs from './components/common/ContactUs'
 import { NotificationProvider } from './context/NotificationContext'
 import { ToastProvider } from './context/ToastContext'
-import { login as loginAction, logout as logoutAction } from './store/slices/authSlice'
 
-// ---------------------------------------------------------------------------
-// Read ?view= param so that the Navbar "Login / Sign Up" links can still open
-// in the same tab and land on the right page.
-// ---------------------------------------------------------------------------
-function getInitialPage() {
-  const params = new URLSearchParams(window.location.search)
-  const view   = params.get('view')
-  if (view === 'login' || view === 'signup-page' || view === 'menu' || view === 'nutrition' || view === 'how-to-use' || view === 'contact') return view
-  return 'home'
-}
+import ProtectedRoute from './components/common/ProtectedRoute'
 
-// ---------------------------------------------------------------------------
-// App
-// ---------------------------------------------------------------------------
 export default function App() {
-  const dispatch = useDispatch()
-
-  // Read authenticated user directly from the Redux Toolkit store
+  const navigate = useNavigate()
   const user = useSelector((state) => state.auth.user)
-
-  // current visible page
-  const [page, setPage] = useState(getInitialPage)
-
-  // optional extra data passed alongside a navigation (e.g. signupSuccess flag)
-  const [pageExtra, setPageExtra] = useState(null)
-
   const [darkMode, setDarkMode] = useState(false)
 
   // Sync dark-mode preference
@@ -51,37 +30,6 @@ export default function App() {
     localStorage.setItem('plateSyncDark', darkMode)
   }, [darkMode])
 
-  // Derive the visible page: if the user is already logged in, treat any
-  // attempt to visit login/signup as a redirect to their dashboard.
-  // This is a pure derivation — no setState inside an effect.
-  const effectivePage = useMemo(() => {
-    if (user && (page === 'login' || page === 'signup-page')) return 'dashboard'
-    return page
-  }, [user, page])
-
-  // ── Navigation helper ──────────────────────────────────────────────────────
-  // SignupPage calls onNavigate('login', { signupSuccess: true })
-  // All other callers just pass the page name.
-  const navigate = (dest, extra = null) => {
-    setPage(dest)
-    setPageExtra(extra)
-  }
-
-  // ── Auth callbacks powered by Redux Actions ───────────────────────────────
-  const handleLogin = (loggedInUser) => {
-    dispatch(loginAction(loggedInUser))
-    setPage('dashboard')
-    setPageExtra(null)
-  }
-
-  const handleLogout = () => {
-    dispatch(logoutAction())
-    setPage('home')
-    setPageExtra(null)
-  }
-
-  // ── Misc helpers ───────────────────────────────────────────────────────────
-  const goHome    = () => { setPage('home');  setPageExtra(null) }
   const toggleDark = () => setDarkMode(prev => !prev)
 
   return (
@@ -89,37 +37,57 @@ export default function App() {
       <NotificationProvider user={user}>
         <div className="app-shell">
           <Navbar
-            page={effectivePage}
-            user={user}
-            onNavigate={navigate}
-            onHome={goHome}
-            onLogout={handleLogout}
             darkMode={darkMode}
             toggleDark={toggleDark}
           />
           <main>
-            {effectivePage === 'home'          && (
-              <Home
-                onGetStarted={() => navigate(user ? 'dashboard' : 'login')}
-                onNavigate={navigate}
+            <Routes>
+              {/* Public Pages */}
+              <Route path="/" element={<Home />} />
+              <Route path="/menu" element={<Menu onNavigate={(dest) => navigate(`/${dest === 'home' ? '' : dest}`)} />} />
+              <Route path="/nutrition" element={<NutritionView onNavigate={(dest) => navigate(`/${dest === 'home' ? '' : dest}`)} />} />
+              <Route path="/how-to-use" element={<HowToUse user={user} onNavigate={(dest) => navigate(`/${dest === 'home' ? '' : dest}`)} />} />
+              <Route path="/contact" element={<ContactUs user={user} onNavigate={(dest) => navigate(`/${dest === 'home' ? '' : dest}`)} />} />
+
+              {/* Protected Notification Center: Requires logged in user */}
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <NotificationCenter onNavigate={(dest) => navigate(`/${dest === 'home' ? '' : dest}`)} />
+                  </ProtectedRoute>
+                }
               />
-            )}
-            {effectivePage === 'signup-page'   && <SignupPage onNavigate={navigate} />}
-            {effectivePage === 'login'         && (
-              <Login
-                onNavigate={navigate}
-                onLogin={handleLogin}
-                signupSuccess={pageExtra?.signupSuccess}
+
+              {/* Authentication Routes: redirect to /dashboard if already logged in */}
+              <Route
+                path="/login"
+                element={user ? <Navigate to="/dashboard" replace /> : <Login />}
               />
-            )}
-            {effectivePage === 'dashboard'     && <Dashboard user={user} onHome={goHome} onLogout={handleLogout} />}
-            {effectivePage === 'menu'          && <Menu onNavigate={navigate} />}
-            {effectivePage === 'nutrition'     && <NutritionView onNavigate={navigate} />}
-            {effectivePage === 'notifications' && <NotificationCenter onNavigate={navigate} />}
-            {effectivePage === 'how-to-use'    && <HowToUse onNavigate={navigate} user={user} />}
-            {effectivePage === 'contact'       && <ContactUs onNavigate={navigate} user={user} />}
+              <Route
+                path="/signup"
+                element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />}
+              />
+              <Route
+                path="/signup-page"
+                element={<Navigate to="/signup" replace />}
+              />
+
+              {/* State-Aware Protected Route: redirects unauthenticated users to /login */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard user={user} onHome={() => navigate('/')} />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* 404 Catch-All Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </main>
-          <Footer onNavigate={navigate} />
+          <Footer onNavigate={(dest) => navigate(`/${dest === 'home' ? '' : dest}`)} />
           {/* Global toast container — renders on top of everything */}
           <ToastContainer />
         </div>

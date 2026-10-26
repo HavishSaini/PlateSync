@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faArrowRight,
@@ -10,8 +11,11 @@ import { useToast } from '../../context/ToastContext'
 import { login as loginAction } from '../../store/slices/authSlice'
 import './Login.css'
 
-export default function Login({ onNavigate, onLogin, signupSuccess }) {
+export default function Login({ onNavigate, onLogin, signupSuccess: propSignupSuccess }) {
+  const navigate = useNavigate()
+  const location = useLocation()
   const dispatch = useDispatch()
+  const signupSuccess = propSignupSuccess || location.state?.signupSuccess
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -56,6 +60,10 @@ export default function Login({ onNavigate, onLogin, signupSuccess }) {
       dispatch(loginAction(sessionUser))
 
       if (onLogin) onLogin(sessionUser)
+
+      // Navigate to intended destination if redirected by ProtectedRoute, otherwise /dashboard
+      const destination = location.state?.from?.pathname || '/dashboard'
+      navigate(destination, { replace: true })
     }, 600)
   }
 
@@ -130,13 +138,13 @@ export default function Login({ onNavigate, onLogin, signupSuccess }) {
 
         <p className="login-footer">
           Don&apos;t have an account?
-          <button
+          <Link
+            to="/signup"
             className="login-link-btn"
             id="go-to-signup"
-            onClick={() => onNavigate && onNavigate('signup-page')}
           >
             Sign up
-          </button>
+          </Link>
         </p>
       </div>
     </section>

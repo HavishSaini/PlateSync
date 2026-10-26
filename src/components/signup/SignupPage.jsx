@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faEye,
@@ -13,6 +14,7 @@ import './SignupPage.css'
 const hostels = ['Alfred Noble-A', 'Alfred Noble-B', 'Archimedes-A', 'Archimedes-B', 'Franklin-A', 'Franklin-B', 'Magellan']
 
 export default function SignupPage({ onNavigate }) {
+  const navigate = useNavigate()
   const [form, setForm] = useState({
     fullName: '', hostel: '', userType: '',
     rollNo: '', staffId: '', room: '', messId: '', email: '', password: ''
@@ -80,8 +82,9 @@ export default function SignupPage({ onNavigate }) {
         duration: 5000,
       })
 
-      // Navigate to Login and pass a flag so it can display a success banner
+      // Programmatic navigation to /login with state
       if (onNavigate) onNavigate('login', { signupSuccess: true })
+      navigate('/login', { state: { signupSuccess: true } })
     }, 800)
   }
 
@@ -275,13 +278,13 @@ export default function SignupPage({ onNavigate }) {
 
         <p className="sp-footer">
           Already have an account?
-          <button
+          <Link
+            to="/login"
             className="sp-link-btn"
             id="go-to-login"
-            onClick={() => onNavigate && onNavigate('login')}
           >
             Log in
-          </button>
+          </Link>
         </p>
       </div>
     </section>

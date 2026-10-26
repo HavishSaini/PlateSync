@@ -1,29 +1,26 @@
+import { Link } from 'react-router-dom'
 import './Footer.css'
 
-export default function Footer({ onNavigate }) {
-  const handleNav = (target) => {
-    if (onNavigate) {
-      onNavigate(target)
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+export default function Footer() {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <div className="footer-logo">
+          <Link to="/" onClick={scrollToTop} className="footer-logo">
             <span>P</span>
             <strong>PlateSync</strong>
-          </div>
+          </Link>
         </div>
 
         <nav className="footer-links" aria-label="Footer navigation">
-          <button type="button" onClick={() => handleNav('home')}>Home</button>
-          <button type="button" onClick={() => handleNav('menu')}>Menu</button>
-          <button type="button" onClick={() => handleNav('how-to-use')}>About</button>
-          <button type="button" onClick={() => handleNav('contact')} id="footer-contact-btn">Contact</button>
+          <Link to="/" onClick={scrollToTop}>Home</Link>
+          <Link to="/menu" onClick={scrollToTop}>Menu</Link>
+          <Link to="/how-to-use" onClick={scrollToTop}>About</Link>
+          <Link to="/contact" onClick={scrollToTop} id="footer-contact-btn">Contact</Link>
         </nav>
 
         <div className="footer-tagline">

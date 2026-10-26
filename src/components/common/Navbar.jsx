@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faChevronDown,
@@ -12,9 +14,14 @@ import {
   faMoon
 } from '@fortawesome/free-solid-svg-icons'
 import { useNotifications } from '../../context/NotificationContext'
+import { logout as logoutAction } from '../../store/slices/authSlice'
 import './Navbar.css'
 
-export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkMode, toggleDark }) {
+export default function Navbar({ darkMode, toggleDark }) {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.auth.user)
+
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -40,14 +47,25 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
 
   const isMenuSubVisible = menuSubOpen || menuSubHover
 
+  const handleLogout = () => {
+    dispatch(logoutAction())
+    navigate('/')
+  }
+
   return (
     <header className="navbar">
-      <button className="logo" onClick={onHome} aria-label="Go to PlateSync home">
+      <Link to="/" className="logo" aria-label="Go to PlateSync home">
         <span>P</span>PlateSync
-      </button>
+      </Link>
 
       <nav aria-label="Main navigation">
-        <button onClick={onHome} className={page === 'home' ? 'active' : ''}>Home</button>
+        <NavLink
+          to="/"
+          className={({ isActive }) => isActive ? 'active' : ''}
+          end
+        >
+          Home
+        </NavLink>
 
         {/* Menu item with Nutrition & Allergens submenu */}
         <div
@@ -57,13 +75,14 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
           onMouseLeave={() => setMenuSubHover(false)}
         >
           <div className="nav-menu-btn-group">
-            <button
-              onClick={() => { onNavigate('menu'); setMenuSubOpen(false) }}
-              className={`nav-menu-btn ${(page === 'menu' || page === 'nutrition') ? 'active' : ''}`}
+            <NavLink
+              to="/menu"
+              className={({ isActive }) => `nav-menu-btn ${isActive ? 'active' : ''}`}
               id="nav-menu-main-btn"
+              onClick={() => setMenuSubOpen(false)}
             >
               Menu
-            </button>
+            </NavLink>
             <button
               type="button"
               className={`nav-menu-chevron-btn ${isMenuSubVisible ? 'open' : ''}`}
@@ -82,10 +101,11 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
 
           {isMenuSubVisible && (
             <div className="nav-menu-submenu" role="menu" aria-label="Menu options">
-              <button
+              <NavLink
+                to="/menu"
                 role="menuitem"
-                className={`nav-submenu-item ${page === 'menu' ? 'active' : ''}`}
-                onClick={() => { onNavigate('menu'); setMenuSubOpen(false) }}
+                className={({ isActive }) => `nav-submenu-item ${isActive ? 'active' : ''}`}
+                onClick={() => setMenuSubOpen(false)}
                 id="nav-sub-menu"
               >
                 <span className="submenu-icon" aria-hidden="true">
@@ -95,12 +115,13 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                   <span className="submenu-title">Weekly Mess Menu</span>
                   <span className="submenu-desc">Schedule & day-by-day meals</span>
                 </div>
-              </button>
+              </NavLink>
 
-              <button
+              <NavLink
+                to="/nutrition"
                 role="menuitem"
-                className={`nav-submenu-item ${page === 'nutrition' ? 'active' : ''}`}
-                onClick={() => { onNavigate('nutrition'); setMenuSubOpen(false) }}
+                className={({ isActive }) => `nav-submenu-item ${isActive ? 'active' : ''}`}
+                onClick={() => setMenuSubOpen(false)}
                 id="nav-sub-nutrition"
               >
                 <span className="submenu-icon" aria-hidden="true">
@@ -110,26 +131,26 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                   <span className="submenu-title">Nutrition & Allergens</span>
                   <span className="submenu-desc">Calories, macros & dietary safety</span>
                 </div>
-              </button>
+              </NavLink>
             </div>
           )}
         </div>
 
-        <button
-          onClick={() => onNavigate('how-to-use')}
-          className={page === 'how-to-use' ? 'active' : ''}
+        <NavLink
+          to="/how-to-use"
+          className={({ isActive }) => isActive ? 'active' : ''}
           id="nav-about-btn"
         >
           About
-        </button>
+        </NavLink>
 
         {user && (
-          <button
-            onClick={() => onNavigate('dashboard')}
-            className={page === 'dashboard' ? 'active' : ''}
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) => isActive ? 'active' : ''}
           >
             My Dashboard
-          </button>
+          </NavLink>
         )}
 
         {/* Auth area — changes based on login state */}
@@ -141,9 +162,9 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
             </span>
 
             {/* Notification Bell */}
-            <button
-              className={`nav-bell-btn${page === 'notifications' ? ' nav-bell-active' : ''}`}
-              onClick={() => onNavigate('notifications')}
+            <NavLink
+              to="/notifications"
+              className={({ isActive }) => `nav-bell-btn${isActive ? ' nav-bell-active' : ''}`}
               aria-label={`Notifications${unreadCount > 0 ? ` — ${unreadCount} unread` : ''}`}
               title="Notification Center"
               id="nav-bell"
@@ -156,12 +177,12 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
-            </button>
+            </NavLink>
 
             <button
               className="nav-logout-btn"
               id="nav-logout"
-              onClick={onLogout}
+              onClick={handleLogout}
             >
               <FontAwesomeIcon icon={faRightFromBracket} style={{ marginRight: 6 }} />
               Log out
@@ -169,20 +190,20 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
           </div>
         ) : (
           <div className="nav-auth-btns">
-            <button
+            <Link
+              to="/login"
               className="nav-login-btn"
               id="nav-login"
-              onClick={() => onNavigate('login')}
             >
               Login
-            </button>
-            <button
+            </Link>
+            <Link
+              to="/signup"
               className="nav-signup-btn"
               id="nav-signup"
-              onClick={() => onNavigate('signup-page')}
             >
               Sign Up
-            </button>
+            </Link>
           </div>
         )}
 
@@ -218,9 +239,10 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
               <div className="dropdown-divider" />
 
               <p className="dropdown-label">HELP & GUIDES</p>
-              <button
-                className={`ham-nav-item ${page === 'how-to-use' ? 'active' : ''}`}
-                onClick={() => { onNavigate('how-to-use'); setMenuOpen(false) }}
+              <NavLink
+                to="/how-to-use"
+                className={({ isActive }) => `ham-nav-item ${isActive ? 'active' : ''}`}
+                onClick={() => setMenuOpen(false)}
                 role="menuitem"
                 id="ham-how-to-use"
               >
@@ -229,11 +251,12 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                 </span>
                 <span className="ham-nav-text">How to Use</span>
                 <span className="ham-nav-badge">Guide</span>
-              </button>
+              </NavLink>
 
-              <button
-                className={`ham-nav-item ${page === 'contact' ? 'active' : ''}`}
-                onClick={() => { onNavigate('contact'); setMenuOpen(false) }}
+              <NavLink
+                to="/contact"
+                className={({ isActive }) => `ham-nav-item ${isActive ? 'active' : ''}`}
+                onClick={() => setMenuOpen(false)}
                 role="menuitem"
                 id="ham-contact-us"
               >
@@ -241,7 +264,7 @@ export default function Navbar({ page, user, onNavigate, onHome, onLogout, darkM
                   <FontAwesomeIcon icon={faEnvelope} />
                 </span>
                 <span className="ham-nav-text">Contact Us</span>
-              </button>
+              </NavLink>
             </div>
           )}
         </div>

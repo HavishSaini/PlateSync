@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faBookOpen,
@@ -24,6 +25,7 @@ import {
 import './HowToUse.css'
 
 export default function HowToUse({ onNavigate, user }) {
+  const navigate = useNavigate()
   const [roleTab, setRoleTab] = useState(user?.role === 'admin' ? 'admin' : 'student')
   const [openFaq, setOpenFaq] = useState(null)
 
@@ -271,14 +273,20 @@ export default function HowToUse({ onNavigate, user }) {
         <div className="cta-buttons">
           <button
             className="cta-primary-btn"
-            onClick={() => onNavigate(user ? 'dashboard' : 'login')}
+            onClick={() => {
+              if (onNavigate) onNavigate(user ? 'dashboard' : 'login')
+              navigate(user ? '/dashboard' : '/login')
+            }}
           >
             {user ? 'Go to My Dashboard' : 'Login to PlateSync'}
             <FontAwesomeIcon icon={faArrowRight} style={{ marginLeft: 8 }} />
           </button>
           <button
             className="cta-secondary-btn"
-            onClick={() => onNavigate('menu')}
+            onClick={() => {
+              if (onNavigate) onNavigate('menu')
+              navigate('/menu')
+            }}
           >
             View Weekly Menu
           </button>

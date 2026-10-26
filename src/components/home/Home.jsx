@@ -22,35 +22,33 @@ import mealLunchImg from '../../assets/meal_lunch.jpg'
 import mealDinnerImg from '../../assets/meal_dinner.jpg'
 import mealSnacksImg from '../../assets/meal_snacks.jpg'
 import studentAvatarImg from '../../assets/student_avatar_aditi.jpg'
+import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import './Home.css'
 
 export default function Home({ onGetStarted, onNavigate }) {
+  const navigate = useNavigate()
+  const user = useSelector((state) => state.auth.user)
   const [activePreviewMeal, setActivePreviewMeal] = useState('breakfast')
 
   const handleBookClick = () => {
     if (onGetStarted) {
       onGetStarted()
-    } else if (onNavigate) {
-      onNavigate('dashboard')
+    } else {
+      navigate(user ? '/dashboard' : '/login')
     }
   }
 
   const handleMenuClick = () => {
-    if (onNavigate) {
-      onNavigate('menu')
-    }
+    navigate('/menu')
   }
 
   const handleNutritionClick = () => {
-    if (onNavigate) {
-      onNavigate('nutrition')
-    }
+    navigate('/nutrition')
   }
 
   const handleAboutClick = () => {
-    if (onNavigate) {
-      onNavigate('how-to-use')
-    }
+    navigate('/how-to-use')
   }
 
   // Today's Menu data matching the reference blueprint & authentic campus items
