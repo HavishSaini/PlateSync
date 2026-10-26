@@ -1056,7 +1056,7 @@ function LiveDemand() {
           <p className="section-label">DYNAMIC SAFETY BUFFER</p>
           <h2>Transparent, data-backed estimate</h2>
           <p>
-            The fixed buffer of 5 has been replaced by <strong>10% of average historical actual attendance</strong> for each meal:
+            The buffer of <strong>10% of average historical actual attendance</strong> for each meal:
             <br />
             <code>Recommended = CEIL(Bookings × 91%) + CEIL(Avg Past Actual × 10%)</code>
           </p>
